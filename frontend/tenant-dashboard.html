@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyRentBD - Tenant Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Color Palette */
+        :root {
+            --bg-light: #f5f5f5;
+            --text-dark: #2d3748;
+            --primary-teal: #4299e1;
+            --accent-yellow: #f6ad55;
+            --border-gray: #e2e8f0;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+        }
+
+        .text-primary {
+            color: var(--primary-teal);
+        }
+
+        .bg-primary {
+            background-color: var(--primary-teal);
+        }
+
+        .hover\:bg-primary-dark:hover {
+            background-color: #3182ce;
+        }
+
+        .border-primary {
+            border-color: var(--primary-teal);
+        }
+
+        .accent-bg {
+            background-color: var(--accent-yellow);
+        }
+
+        .text-accent {
+            color: var(--accent-yellow);
+        }
+
+        /* Animations */
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .animate-slide-up {
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .animate-bounce-in {
+            animation: bounceIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .hover-lift {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Sidebar Styles */
+        .sidebar-slide {
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .nav-item {
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .nav-item:hover {
+            transform: translateX(4px);
+            background: rgba(66, 153, 225, 0.1);
+        }
+        
+        .nav-item.active {
+            background: var(--primary-teal);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .nav-item.active .fas {
+            color: white;
+        }
+        
+        .nav-item:not(.active) .fas {
+            color: var(--primary-teal);
+        }
+
+        /* <CHANGE> Added smooth transition for main content when sidebar toggles */
+        .main-content {
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        /* Custom scrollbar for chat */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #a0aec0;
+            border-radius: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #718096;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <header class="bg-white shadow-sm border-b border-gray-200 fixed w-full top-0 z-50">
+        <div class="px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <!-- <CHANGE> Made hamburger button visible on all screen sizes -->
+                    <button id="sidebarToggle" class="p-2 text-gray-600 hover:text-gray-900 transition-colors">
+                        <i class="fas fa-bars text-lg"></i>
+                    </button>
+                    <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-home text-white text-sm"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-gray-900">EasyRentBD</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="relative p-2 text-gray-400 hover:text-gray-500 transition-colors">
+                        <i class="fas fa-bell text-lg"></i>
+                        <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-bounce-in"></span>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                            <span id="user-initial" class="text-gray-600 font-medium text-sm"></span>
+                        </div>
+                        <span id="user-name" class="text-sm font-medium text-gray-700"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex pt-16">
+        <!-- <CHANGE> Modified sidebar to be hidden by default and toggleable on all screen sizes -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-gray-200 transform -translate-x-full sidebar-slide pt-16">
+            <!-- ... existing code ... -->
+            <div class="flex flex-col h-full">
+                <div class="p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-6">Dashboard Menu</h2>
+                    <div class="mb-8">
+                        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Main Features</h3>
+                        <nav class="space-y-2">
+                            
+                            <button id="overviewButton" class="nav-item active w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg">
+                                <i class="fas fa-home mr-3 text-base"></i>
+                                Dashboard Overview
+                            </button>
+                            <button id="searchButton" class="nav-item w-full flex items-center px-4 py-3 text-sm font-medium text-gray-700 rounded-lg">
+                                <i class="fas fa-search mr-3 text-base"></i>
+                                Browse Properties
+                            </button>
+                            <button id="mapButton" class="nav-item w-full flex items-center px-4 py-3 text-sm font-medium text-gray-700 rounded-lg">
+                                <i class="fas fa-map mr-3 text-base"></i>
+                                Interactive Map
+                            </button>
+                            <button id="amenitiesButton" class="nav-item w-full flex items-center px-4 py-3 text-sm font-medium text-gray-700 rounded-lg">
+                                <i class="fas fa-map-marker-alt mr-3 text-base"></i>
+                                Nearby Amenities
+                            </button>
+                        </nav>
+                    </div>
+                    <div class="mb-8">
+                        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Account & History</h3>
+                        <nav class="space-y-2">
+                            <button id="savedButton" class="nav-item w-full flex items-center px-4 py-3 text-sm font-medium text-gray-700 rounded-lg">
+                                <i class="fas fa-bookmark mr-3 text-base"></i>
+                                Saved Searches
+                            </button>
+                            <button id="recommendationsButton" class="nav-item w-full flex items-center px-4 py-3 text-sm font-medium text-gray-700 rounded-lg">
+                                <i class="fas fa-star mr-3 text-base"></i>
+                                Recommendations
+                            </button>
+                            <button id="historyButton" class="nav-item w-full flex items-center px-4 py-3 text-sm font-medium text-gray-700 rounded-lg">
+                                <i class="fas fa-history mr-3 text-base"></i>
+                                Transaction History
+                            </button>
+                        </nav>
+                    </div>
+                    <div class="mb-8">
+                        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Reviews & Support</h3>
+                        <nav class="space-y-2">
+                            <button id="reviewsButton" class="nav-item w-full flex items-center px-4 py-3 text-sm font-medium text-gray-700 rounded-lg">
+                                <i class="fas fa-comment-alt mr-3 text-base"></i>
+                                Reviews & Ratings
+                            </button>
+                            <button id="supportButton" class="nav-item w-full flex items-center px-4 py-3 text-sm font-medium text-gray-700 rounded-lg">
+                                <i class="fas fa-headset mr-3 text-base"></i>
+                                Support
+                            </button>
+                        </nav>
+                    </div>
+                    <div class="mt-auto mb-6">
+                        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Settings</h3>
+                        <nav class="space-y-2">
+                            <button id="settingsButton" class="nav-item w-full flex items-center px-4 py-3 text-sm font-medium text-gray-700 rounded-lg">
+                                <i class="fas fa-cog mr-3 text-base"></i>
+                                Account Settings
+                            </button>
+                            <button onclick="handleLogout()" class="border border-red-200 mt-4 nav-item w-full flex items-center px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg">
+                                <i class="fas fa-sign-out-alt mr-3 text-base"></i>
+                                Logout
+                            </button>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- <CHANGE> Updated overlay to work on all screen sizes -->
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
+
+        <!-- <CHANGE> Removed automatic margin-left and added dynamic class for main content -->
+        <main id="mainContent" class="flex-1 main-content">
+            <!-- ... existing code ... -->
+            <div class="p-6">
+                <!-- Dashboard Overview Section -->
+                <div id="overviewSection" class="section-content">
+                    <!-- Hero Section with AI Search CTA -->
+                    <div class="mb-8 animate-slide-up">
+                        <div class="bg-gradient-to-r from-blue-600 to-purple-700 rounded-xl shadow-lg p-8 text-white">
+                            <div class="flex flex-col lg:flex-row items-center justify-between gap-6">
+                                <div class="flex items-center space-x-6">
+                                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center animate-bounce-in">
+                                        <i class="fas fa-robot text-white text-2xl"></i>
+                                    </div>
+                                    <div>
+                                        <h2 id="welcome-message" class="text-3xl font-bold mb-2"></h2>
+                                        <p class="text-blue-100 text-lg mb-1">Your AI-powered property search companion</p>
+                                        <p class="text-blue-200 text-sm">Find your perfect home with natural language: "Show me 2BR apartments in Gulshan under 30k"</p>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col sm:flex-row gap-3">
+                                    <a href="./property-search.html" class="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-all transform hover:scale-105 flex items-center space-x-2 shadow-lg">
+                                        <i class="fas fa-comments"></i>
+                                        <span>Start AI Search</span>
+                                    </a>
+                                    <button onclick="showQuickSearch()" class="bg-blue-500 bg-opacity-20 text-white px-6 py-3 rounded-lg font-medium hover:bg-opacity-30 transition-all flex items-center space-x-2 border border-white border-opacity-20">
+                                        <i class="fas fa-filter"></i>
+                                        <span>Advanced Filters</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats Dashboard -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover-lift animate-slide-up">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-home text-blue-600 text-xl"></i>
+                                </div>
+                                <span id="stat-available-properties" class="text-2xl font-bold text-gray-900"></span>
+                            </div>
+                            <h3 class="font-semibold text-gray-900 mb-1">Available Properties</h3>
+                            <p class="text-sm text-gray-500">Across Dhaka city</p>
+                            <div class="mt-2 text-xs text-green-600 font-medium">
+                                <i class="fas fa-arrow-up mr-1"></i>+12% this week
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover-lift animate-slide-up">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-map-marker-alt text-green-600 text-xl"></i>
+                                </div>
+                                <span id="stat-areas-covered" class="text-2xl font-bold text-gray-900"></span>
+                            </div>
+                            <h3 class="font-semibold text-gray-900 mb-1">Areas Covered</h3>
+                            <p class="text-sm text-gray-500">Premium locations</p>
+                            <div class="mt-2 text-xs text-blue-600 font-medium">
+                                <i class="fas fa-info-circle mr-1"></i>Including Gulshan, Dhanmondi
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover-lift animate-slide-up">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-bookmark text-purple-600 text-xl"></i>
+                                </div>
+                                <span id="stat-saved-searches" class="text-2xl font-bold text-gray-900"></span>
+                            </div>
+                            <h3 class="font-semibold text-gray-900 mb-1">Saved Searches</h3>
+                            <p class="text-sm text-gray-500">Your preferences</p>
+                            <div class="mt-2 text-xs text-purple-600 font-medium cursor-pointer hover:underline">
+                                <i class="fas fa-eye mr-1"></i>View saved
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover-lift animate-slide-up">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-star text-yellow-600 text-xl"></i>
+                                </div>
+                                <span id="stat-recommendations" class="text-2xl font-bold text-gray-900"></span>
+                            </div>
+                            <h3 class="font-semibold text-gray-900 mb-1">AI Recommendations</h3>
+                            <p class="text-sm text-gray-500">Curated for you</p>
+                            <div class="mt-2 text-xs text-yellow-600 font-medium cursor-pointer hover:underline">
+                                <i class="fas fa-magic mr-1"></i>See recommendations
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Content Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <!-- Recent Activity & Quick Actions -->
+                        <div class="lg:col-span-1 space-y-6">
+                            <!-- Quick Actions -->
+                            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 animate-slide-up">
+                                <h3 class="font-semibold text-gray-900 mb-4 flex items-center">
+                                    <i class="fas fa-bolt text-yellow-500 mr-2"></i>
+                                    Quick Actions
+                                </h3>
+                                <div class="space-y-3">
+                                    <a href="./property-search.html" class="w-full flex items-center p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors group">
+                                        <i class="fas fa-robot text-blue-600 mr-3"></i>
+                                        <span class="text-sm font-medium text-blue-800">AI Property Search</span>
+                                        <i class="fas fa-arrow-right text-blue-600 ml-auto group-hover:translate-x-1 transition-transform"></i>
+                                    </a>
+                                    <button onclick="showQuickSearch()" class="w-full flex items-center p-3 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors group">
+                                        <i class="fas fa-search text-gray-600 mr-3"></i>
+                                        <span class="text-sm font-medium text-gray-700">Browse Properties</span>
+                                        <i class="fas fa-arrow-right text-gray-600 ml-auto group-hover:translate-x-1 transition-transform"></i>
+                                    </button>
+                                    <button onclick="showMap()" class="w-full flex items-center p-3 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors group">
+                                        <i class="fas fa-map text-gray-600 mr-3"></i>
+                                        <span class="text-sm font-medium text-gray-700">Explore Map</span>
+                                        <i class="fas fa-arrow-right text-gray-600 ml-auto group-hover:translate-x-1 transition-transform"></i>
+                                    </button>
+                                    <button onclick="showSaved()" class="w-full flex items-center p-3 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors group">
+                                        <i class="fas fa-bookmark text-gray-600 mr-3"></i>
+                                        <span class="text-sm font-medium text-gray-700">Saved Properties</span>
+                                        <i class="fas fa-arrow-right text-gray-600 ml-auto group-hover:translate-x-1 transition-transform"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Recent Activity -->
+                            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 animate-slide-up">
+                                <h3 class="font-semibold text-gray-900 mb-4 flex items-center">
+                                    <i class="fas fa-history text-green-600 mr-2"></i>
+                                    Recent Activity
+                                </h3>
+                                <div id="recent-activity-container" class="space-y-3">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Featured Properties & Map Preview -->
+                        <div class="lg:col-span-2">
+                            <!-- Featured Properties -->
+                            <div class="bg-white rounded-xl shadow-sm border border-gray-200 animate-slide-up">
+                                <div class="p-6 border-b border-gray-200">
+                                    <div class="flex items-center justify-between">
+                                        <h3 class="font-semibold text-gray-900 flex items-center">
+                                            <i class="fas fa-star text-yellow-500 mr-2"></i>
+                                            Featured Properties
+                                        </h3>
+                                        <div class="flex space-x-2">
+                                            <button class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                                                <i class="fas fa-th-large"></i>
+                                            </button>
+                                            <button class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                                                <i class="fas fa-map"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-6">
+                                    <div id="featured-properties-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    </div>
+                                    <div class="mt-6 text-center">
+                                        <a href="./property-search.html" class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                            <span>View All Properties</span>
+                                            <i class="fas fa-arrow-right ml-2"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ... existing code ... -->
+                <div id="mapSection" class="section-content hidden">
+                    <div class="text-center py-20">
+                        <i class="fas fa-map text-6xl text-gray-300 mb-4"></i>
+                        <h2 class="text-2xl font-bold text-gray-700 mb-2">Interactive Map</h2>
+                        <p class="text-gray-500">Full-screen map view coming soon</p>
+                    </div>
+                </div>
+                <div id="amenitiesSection" class="section-content hidden">
+                    <div class="text-center py-20">
+                        <i class="fas fa-map-marker-alt text-6xl text-gray-300 mb-4"></i>
+                        <h2 class="text-2xl font-bold text-gray-700 mb-2">Nearby Amenities</h2>
+                        <p class="text-gray-500">Discover local amenities and services</p>
+                    </div>
+                </div>
+                <div id="savedSection" class="section-content hidden">
+                    <div class="text-center py-20">
+                        <i class="fas fa-bookmark text-6xl text-gray-300 mb-4"></i>
+                        <h2 class="text-2xl font-bold text-gray-700 mb-2">Saved Searches</h2>
+                        <p class="text-gray-500">Your saved property searches will appear here</p>
+                    </div>
+                </div>
+                <div id="recommendationsSection" class="section-content hidden">
+                    <div class="text-center py-20">
+                        <i class="fas fa-star text-6xl text-gray-300 mb-4"></i>
+                        <h2 class="text-2xl font-bold text-gray-700 mb-2">Recommendations</h2>
+                        <p class="text-gray-500">Personalized property recommendations</p>
+                    </div>
+                </div>
+                <div id="historySection" class="section-content hidden">
+                    <div class="text-center py-20">
+                        <i class="fas fa-history text-6xl text-gray-300 mb-4"></i>
+                        <h2 class="text-2xl font-bold text-gray-700 mb-2">Transaction History</h2>
+                        <p class="text-gray-500">Your rental history and payments</p>
+                    </div>
+                </div>
+                <div id="reviewsSection" class="section-content hidden">
+                    <div class="text-center py-20">
+                        <i class="fas fa-comment-alt text-6xl text-gray-300 mb-4"></i>
+                        <h2 class="text-2xl font-bold text-gray-700 mb-2">Reviews & Ratings</h2>
+                        <p class="text-gray-500">Manage your reviews and ratings</p>
+                    </div>
+                </div>
+                <div id="supportSection" class="section-content hidden">
+                    <div class="text-center py-20">
+                        <i class="fas fa-headset text-6xl text-gray-300 mb-4"></i>
+                        <h2 class="text-2xl font-bold text-gray-700 mb-2">Support</h2>
+                        <p class="text-gray-500">Get help and support</p>
+                    </div>
+                </div>
+                <div id="settingsSection" class="section-content hidden">
+                    <div class="text-center py-20">
+                        <i class="fas fa-cog text-6xl text-gray-300 mb-4"></i>
+                        <h2 class="text-2xl font-bold text-gray-700 mb-2">Account Settings</h2>
+                        <p class="text-gray-500">Manage your account preferences</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        function handleLogout() {
+            if (confirm('Are you sure you want to log out?')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('currentUser');
+                window.location.href = './login.html';
+            }
+        }
+
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const mainContent = document.getElementById('mainContent');
+        const navButtons = document.querySelectorAll('.nav-item');
+        const sections = document.querySelectorAll('.section-content');
+        const chatSectionMain = document.getElementById('chatSectionMain');
+        
+        // <CHANGE> Enhanced sidebar logic to work on all screen sizes
+        sidebarToggle.addEventListener('click', () => {
+            const isOpen = !sidebar.classList.contains('-translate-x-full');
+            
+            if (isOpen) {
+                // Close sidebar
+                sidebar.classList.add('-translate-x-full');
+                sidebarOverlay.classList.add('hidden');
+                mainContent.style.marginLeft = '0';
+            } else {
+                // Open sidebar
+                sidebar.classList.remove('-translate-x-full');
+                sidebarOverlay.classList.remove('hidden');
+                // On larger screens, push content to the right
+                if (window.innerWidth >= 1024) {
+                    mainContent.style.marginLeft = '288px'; // 72 * 4 = 288px (w-72)
+                }
+            }
+        });
+
+        // <CHANGE> Updated overlay click handler
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.add('-translate-x-full');
+            sidebarOverlay.classList.add('hidden');
+            mainContent.style.marginLeft = '0';
+        });
+
+        // <CHANGE> Handle window resize to adjust layout
+        window.addEventListener('resize', () => {
+            const isOpen = !sidebar.classList.contains('-translate-x-full');
+            if (window.innerWidth < 1024) {
+                // On mobile, never push content
+                mainContent.style.marginLeft = '0';
+            } else if (isOpen) {
+                // On desktop with sidebar open, push content
+                mainContent.style.marginLeft = '288px';
+            }
+        });
+
+        // Navigation logic
+        function showSection(sectionId) {
+            sections.forEach(section => {
+                section.classList.add('hidden');
+            });
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+            }
+            navButtons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+        }
+
+        navButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                navButtons.forEach(item => item.classList.remove('active'));
+                const targetId = e.currentTarget.id.replace('Button', '') + 'Section';
+                showSection(targetId);
+                e.currentTarget.classList.add('active');
+                
+                // <CHANGE> Close sidebar on mobile after navigation
+                if (window.innerWidth < 1024) {
+                    sidebar.classList.add('-translate-x-full');
+                    sidebarOverlay.classList.add('hidden');
+                    mainContent.style.marginLeft = '0';
+                }
+            });
+        });
+
+        let availableProperties = [];
+
+        // Initial state
+        window.addEventListener('load', () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = './login.html';
+                return;
+            }
+
+            showSection('overviewSection');
+            loadDashboardData();
+        });
+
+        function loadDashboardData() {
+            const token = localStorage.getItem('token');
+            fetch('http://localhost:5000/api/dashboard/tenant', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.stats) {
+                    updateStats(data.stats);
+                }
+                if (data.recentActivity) {
+                    updateRecentActivity(data.recentActivity);
+                }
+                if (data.recommendations) {
+                    updateFeaturedProperties(data.recommendations);
+                }
+            })
+            .catch(err => console.error('Failed to load dashboard data:', err));
+            
+            // Fetch user data
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (currentUser) {
+                updateUserInfo(currentUser);
+            }
+        }
+
+        function updateUserInfo(user) {
+            if (!user) return;
+            const initial = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+            document.getElementById('user-initial').textContent = initial;
+            document.getElementById('user-name').textContent = user.name || 'User';
+            document.getElementById('welcome-message').textContent = `Welcome, ${user.name || 'User'}!`;
+        }
+
+        function updateStats(stats) {
+            document.getElementById('stat-available-properties').textContent = stats.availableProperties.toLocaleString();
+            document.getElementById('stat-areas-covered').textContent = stats.areasCovered.toLocaleString();
+            document.getElementById('stat-saved-searches').textContent = stats.savedSearches.toLocaleString();
+            document.getElementById('stat-recommendations').textContent = stats.recommendations.toLocaleString();
+        }
+
+        function updateRecentActivity(activity) {
+            const container = document.getElementById('recent-activity-container');
+            if (activity && activity.length > 0) {
+                container.innerHTML = activity.map(item => `
+                    <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-search text-blue-600 text-xs"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-900 truncate">Searched "${item.search_query}"</p>
+                            <p class="text-xs text-gray-500">${new Date(item.created_at).toLocaleDateString()}</p>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = '<p class="text-sm text-gray-500 p-3">No recent activity.</p>';
+            }
+        }
+
+        function updateFeaturedProperties(properties) {
+            const container = document.getElementById('featured-properties-container');
+            if (properties && properties.length > 0) {
+                container.innerHTML = properties.slice(0, 2).map(prop => `
+                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer" onclick="window.location.href='./property-details.html?id=${prop.id}'">
+                        <div class="w-full h-32 bg-gray-200 rounded-lg mb-3 flex items-center justify-center">
+                            <img src="${prop.cover_image || './placeholder.png'}" class="w-full h-full object-cover rounded-lg" onerror="this.style.display='none'"/>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-1 truncate">${prop.title}</h4>
+                        <p class="text-sm text-gray-600 mb-2">${prop.neighborhood}, ${prop.city}</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-lg font-bold text-blue-600">৳${prop.monthly_rent.toLocaleString()}/month</span>
+                            <div class="flex items-center space-x-1 text-xs text-gray-500">
+                                <i class="fas fa-bed"></i>
+                                <span>${prop.bedrooms}</span>
+                                <i class="fas fa-bath ml-2"></i>
+                                <span>${prop.bathrooms}</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = '<p class="text-sm text-gray-500 md:col-span-2">No featured properties available right now.</p>';
+            }
+        }
+
+        function renderPropertyList(properties) {
+            const container = document.getElementById('listView');
+            if (!properties || properties.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12">
+                        <i class="fas fa-home text-6xl text-gray-300 mx-auto mb-4 animate-pulse-custom"></i>
+                        <h3 class="text-lg font-semibold text-gray-700 mb-2">No Properties Found</h3>
+                        <p class="text-gray-500">There are currently no available properties matching your criteria.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = properties.map(prop => `
+                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow flex space-x-4">
+                    <img src="http://localhost:5000${prop.cover_image || ''}" alt="${prop.title}" class="w-32 h-32 object-cover rounded-lg bg-gray-200">
+                    <div class="flex-1">
+                        <div class="flex justify-between">
+                            <h4 class="font-semibold text-lg text-gray-900">${prop.title}</h4>
+                            <span class="text-lg font-bold text-primary">৳${prop.monthly_rent.toLocaleString()}/mo</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2"><i class="fas fa-map-marker-alt mr-1"></i>${prop.neighborhood}, ${prop.city}</p>
+                        <div class="flex items-center space-x-4 text-sm text-gray-500 my-2 border-t border-b py-2">
+                            <span><i class="fas fa-bed mr-1"></i> ${prop.bedrooms} Beds</span>
+                            <span><i class="fas fa-bath mr-1"></i> ${prop.bathrooms} Baths</span>
+                            <span><i class="fas fa-expand-arrows-alt mr-1"></i> ${prop.square_feet} sqft</span>
+                        </div>
+                        <div class="flex justify-end space-x-2 mt-2">
+                            <button class="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded-full hover:bg-gray-300">View Details</button>
+                            <button class="px-3 py-1 bg-primary text-white text-sm rounded-full hover:bg-primary-dark">Send Inquiry</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // View Toggling
+        const mapViewBtn = document.getElementById('mapViewBtn');
+        const listViewBtn = document.getElementById('listViewBtn');
+        const mapView = document.getElementById('mapView');
+        const listView = document.getElementById('listView');
+
+        mapViewBtn.addEventListener('click', () => {
+            mapView.classList.remove('hidden');
+            listView.classList.add('hidden');
+            mapViewBtn.classList.add('text-primary', 'bg-blue-50');
+            mapViewBtn.classList.remove('text-gray-400');
+            listViewBtn.classList.add('text-gray-400');
+            listViewBtn.classList.remove('text-primary', 'bg-blue-50');
+        });
+
+        listViewBtn.addEventListener('click', () => {
+            listView.classList.remove('hidden');
+            mapView.classList.add('hidden');
+            listViewBtn.classList.add('text-primary', 'bg-blue-50');
+            listViewBtn.classList.remove('text-gray-400');
+            mapViewBtn.classList.add('text-gray-400');
+            mapViewBtn.classList.remove('text-primary', 'bg-blue-50');
+        });
+
+        // Set initial view
+        document.addEventListener('DOMContentLoaded', () => {
+            listView.classList.remove('hidden');
+            mapView.classList.add('hidden');
+            listViewBtn.classList.add('text-primary', 'bg-blue-50');
+            listViewBtn.classList.remove('text-gray-400');
+        });
+
+    </script>
+</body>
+</html>
