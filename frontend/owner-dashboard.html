@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyRentBD - Property Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Added Chart.js CDN for working charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Updated color palette for property dashboard */
+        :root {
+            --bg-light: #f8fafc;
+            --text-dark: #1e293b;
+            --primary-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-orange: #f59e0b;
+            --accent-purple: #8b5cf6;
+            --border-gray: #e2e8f0;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        }
+
+        /* Enhanced animations for modern UI */
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .animate-slide-up {
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .animate-bounce-in {
+            animation: bounceIn 0.8s ease-out;
+        }
+
+        .animate-pulse-custom {
+            animation: pulseCustom 2s infinite;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes pulseCustom {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .hover-lift {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Sidebar styles for property dashboard */
+        .sidebar-slide {
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .nav-item {
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .nav-item:hover {
+            transform: translateX(4px);
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .nav-item.active {
+            background: var(--primary-blue);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .nav-item.active .fas {
+            color: white;
+        }
+        
+        .nav-item:not(.active) .fas {
+            color: var(--primary-blue);
+        }
+
+        .main-content {
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        /* Stats card animations */
+        .stats-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,1) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .stats-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Updated header for property dashboard -->
+    <header class="bg-white shadow-sm border-b border-gray-200 fixed w-full top-0 z-50">
+        <div class="px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <button id="sidebarToggle" class="p-2 text-gray-600 hover:text-gray-900 transition-colors">
+                        <i class="fas fa-bars text-lg"></i>
+                    </button>
+                    <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-home text-white text-sm"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-gray-900">EasyRentBD</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <!-- Added property dashboard action buttons -->
+                    <a href="./PropertyManagement.html" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
+                        <i class="fas fa-eye"></i>
+                        <span class="hidden sm:inline">View All Properties</span>
+                    </a>
+                    <a href="./property-creation.html" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2">
+                        <i class="fas fa-plus"></i>
+                        <span class="hidden sm:inline">Add Property</span>
+                    </a>
+                    <button class="relative p-2 text-gray-400 hover:text-gray-500 transition-colors">
+                        <i class="fas fa-bell text-lg"></i>
+                        <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-bounce-in"></span>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                            <span class="text-gray-600 font-medium text-sm">PO</span>
+                        </div>
+                        <span class="text-sm font-medium text-gray-700">Property Owner</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex pt-16">
+        <!-- Property dashboard sidebar -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-gray-200 transform -translate-x-full sidebar-slide pt-16">
+            <div class="flex flex-col h-full">
+                <div class="p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-6">Property Dashboard</h2>
+                    <div class="mb-8">
+                        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Overview</h3>
+                        <nav class="space-y-2">
+                            <button id="dashboardButton" class="nav-item active w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg">
+                                <i class="fas fa-chart-bar mr-3 text-base"></i>
+                                Dashboard
+                            </button>
+                            <button id="propertiesButton" class="nav-item w-full flex items-center px-4 py-3 text-sm font-medium text-gray-700 rounded-lg">
+                                <i class="fas fa-building mr-3 text-base"></i>
+                                My Properties
+                            </button>
+                            <button id="inquiriesButton" class="nav-item w-full flex items-center px-4 py-3 text-sm font-medium text-gray-700 rounded-lg">
+                                <i class="fas fa-envelope mr-3 text-base"></i>
+                                Inquiries
+                            </button>
+                        </nav>
+                    </div>
+                    <div class="mb-8">
+                        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Management</h3>
+                        <nav class="space-y-2">
+                            <button id="tenantsButton" class="nav-item w-full flex items-center px-4 py-3 text-sm font-medium text-gray-700 rounded-lg">
+                                <i class="fas fa-users mr-3 text-base"></i>
+                                Tenants
+                            </button>
+                            <button id="maintenanceButton" class="nav-item w-full flex items-center px-4 py-3 text-sm font-medium text-gray-700 rounded-lg">
+                                <i class="fas fa-tools mr-3 text-base"></i>
+                                Maintenance
+                            </button>
+                            <button id="financialsButton" class="nav-item w-full flex items-center px-4 py-3 text-sm font-medium text-gray-700 rounded-lg">
+                                <i class="fas fa-dollar-sign mr-3 text-base"></i>
+                                Financials
+                            </button>
+                        </nav>
+                    </div>
+                    <div class="mt-auto mb-6">
+                        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Settings</h3>
+                        <nav class="space-y-2">
+                            <button id="settingsButton" class="nav-item w-full flex items-center px-4 py-3 text-sm font-medium text-gray-700 rounded-lg">
+                                <i class="fas fa-cog mr-3 text-base"></i>
+                                Settings
+                            </button>
+                            <button onclick="handleLogout()" class="border border-red-200 mt-4 nav-item w-full flex items-center px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg">
+                                <i class="fas fa-sign-out-alt mr-3 text-base"></i>
+                                Logout
+                            </button>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
+
+        <main id="mainContent" class="flex-1 main-content">
+            <div class="p-6">
+                <!-- Property Dashboard Content -->
+                <div id="dashboardSection" class="section-content">
+                    <div class="mb-6">
+                        <h1 class="text-2xl font-bold text-gray-900 mb-2">Property Dashboard</h1>
+                        <p class="text-gray-600">Manage your properties and track performance metrics</p>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="stats-card rounded-xl p-6 hover-lift animate-slide-up">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Total Properties</p>
+                                    <p id="statTotalProperties" class="text-3xl font-bold text-gray-900">-</p>
+                                    <p class="text-sm text-gray-500 mt-1">&nbsp;</p>
+                                </div>
+                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-building text-blue-600 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stats-card rounded-xl p-6 hover-lift animate-slide-up">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Total Revenue</p>
+                                    <p id="statTotalRevenue" class="text-3xl font-bold text-gray-900">-</p>
+                                    <p class="text-sm text-gray-500 mt-1">&nbsp;</p>
+                                </div>
+                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-dollar-sign text-green-600 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stats-card rounded-xl p-6 hover-lift animate-slide-up">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Active Inquiries</p>
+                                    <p id="statActiveInquiries" class="text-3xl font-bold text-gray-900">-</p>
+                                    <p class="text-sm text-gray-500 mt-1">&nbsp;</p>
+                                </div>
+                                <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-envelope text-orange-600 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stats-card rounded-xl p-6 hover-lift animate-slide-up">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Occupancy Rate</p>
+                                    <p id="statOccupancyRate" class="text-3xl font-bold text-gray-900">-</p>
+                                    <p class="text-sm text-gray-500 mt-1">&nbsp;</p>
+                                </div>
+                                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-percentage text-purple-600 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                        <!-- Working Revenue Chart -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover-lift animate-slide-up">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-lg font-semibold text-gray-900">Monthly Revenue</h3>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-sm text-gray-500">Last 6 months</span>
+                                </div>
+                            </div>
+                            <div class="relative h-64">
+                                <canvas id="revenueChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Recent Inquiries Section -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover-lift animate-slide-up">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-lg font-semibold text-gray-900">Recent Inquiries</h3>
+                                <button class="text-blue-600 hover:text-blue-700 text-sm font-medium">View All</button>
+                            </div>
+                            <div id="recentInquiriesContainer" class="space-y-4">
+                                <p class="text-sm text-gray-500">No recent inquiries.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Properties Overview -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover-lift animate-slide-up">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-semibold text-gray-900">My Properties Overview</h3>
+                            <button class="text-blue-600 hover:text-blue-700 text-sm font-medium">View All</button>
+                        </div>
+                        <div id="propertiesOverviewContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <p class="text-sm text-gray-500 col-span-full">No properties to display.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other sections for navigation -->
+                <div id="propertiesSection" class="section-content hidden">
+                    <div class="text-center py-20">
+                        <i class="fas fa-building text-6xl text-gray-300 mb-4"></i>
+                        <h2 class="text-2xl font-bold text-gray-700 mb-2">My Properties</h2>
+                        <p class="text-gray-500">Manage all your property listings</p>
+                    </div>
+                </div>
+
+                <div id="inquiriesSection" class="section-content hidden">
+                    <div class="text-center py-20">
+                        <i class="fas fa-envelope text-6xl text-gray-300 mb-4"></i>
+                        <h2 class="text-2xl font-bold text-gray-700 mb-2">Inquiries</h2>
+                        <p class="text-gray-500">Manage tenant inquiries and communications</p>
+                    </div>
+                </div>
+
+                <div id="tenantsSection" class="section-content hidden">
+                    <div class="text-center py-20">
+                        <i class="fas fa-users text-6xl text-gray-300 mb-4"></i>
+                        <h2 class="text-2xl font-bold text-gray-700 mb-2">Tenants</h2>
+                        <p class="text-gray-500">Manage your current and past tenants</p>
+                    </div>
+                </div>
+
+                <div id="maintenanceSection" class="section-content hidden">
+                    <div class="text-center py-20">
+                        <i class="fas fa-tools text-6xl text-gray-300 mb-4"></i>
+                        <h2 class="text-2xl font-bold text-gray-700 mb-2">Maintenance</h2>
+                        <p class="text-gray-500">Track maintenance requests and schedules</p>
+                    </div>
+                </div>
+
+                <div id="financialsSection" class="section-content hidden">
+                    <div class="text-center py-20">
+                        <i class="fas fa-dollar-sign text-6xl text-gray-300 mb-4"></i>
+                        <h2 class="text-2xl font-bold text-gray-700 mb-2">Financials</h2>
+                        <p class="text-gray-500">View financial reports and analytics</p>
+                    </div>
+                </div>
+
+                <div id="settingsSection" class="section-content hidden">
+                    <div class="text-center py-20">
+                        <i class="fas fa-cog text-6xl text-gray-300 mb-4"></i>
+                        <h2 class="text-2xl font-bold text-gray-700 mb-2">Settings</h2>
+                        <p class="text-gray-500">Manage your account and preferences</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        function handleLogout() {
+            if (confirm('Are you sure you want to log out?')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('currentUser');
+                window.location.href = './login.html';
+            }
+        }
+
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const mainContent = document.getElementById('mainContent');
+        const navButtons = document.querySelectorAll('.nav-item');
+        const sections = document.querySelectorAll('.section-content');
+        let revenueChart;
+
+        // Sidebar and Navigation Logic
+        sidebarToggle.addEventListener('click', () => {
+            const isOpen = !sidebar.classList.contains('-translate-x-full');
+            if (isOpen) {
+                sidebar.classList.add('-translate-x-full');
+                sidebarOverlay.classList.add('hidden');
+                mainContent.style.marginLeft = '0';
+            } else {
+                sidebar.classList.remove('-translate-x-full');
+                sidebarOverlay.classList.remove('hidden');
+                if (window.innerWidth >= 1024) {
+                    mainContent.style.marginLeft = '288px';
+                }
+            }
+        });
+
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.add('-translate-x-full');
+            sidebarOverlay.classList.add('hidden');
+            mainContent.style.marginLeft = '0';
+        });
+
+        window.addEventListener('resize', () => {
+            const isOpen = !sidebar.classList.contains('-translate-x-full');
+            if (window.innerWidth < 1024) {
+                mainContent.style.marginLeft = '0';
+            } else if (isOpen) {
+                mainContent.style.marginLeft = '288px';
+            }
+        });
+
+        function showSection(sectionId) {
+            sections.forEach(section => section.classList.add('hidden'));
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) targetSection.classList.remove('hidden');
+        }
+
+        navButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                navButtons.forEach(item => item.classList.remove('active'));
+                const targetId = e.currentTarget.id.replace('Button', '') + 'Section';
+                showSection(targetId);
+                e.currentTarget.classList.add('active');
+                if (window.innerWidth < 1024) {
+                    sidebar.classList.add('-translate-x-full');
+                    sidebarOverlay.classList.add('hidden');
+                    mainContent.style.marginLeft = '0';
+                }
+            });
+        });
+
+        // Chart Initialization
+        function initializeChart() {
+            const ctx = document.getElementById('revenueChart');
+            if (!ctx) return;
+            try {
+                revenueChart = new Chart(ctx, {
+                    type: 'line',
+                    data: { labels: [], datasets: [{ label: 'Monthly Revenue (৳)', data: [], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 3, fill: true, tension: 0.4 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { callback: (value) => '৳' + (value / 1000) + 'K' } } } }
+                });
+            } catch (error) {
+                console.error('Error initializing chart:', error);
+            }
+        }
+
+        // Data Fetching and Rendering Logic
+        document.addEventListener('DOMContentLoaded', function() {
+            showSection('dashboardSection');
+            initializeChart();
+            loadOwnerDashboard();
+        });
+
+        function loadOwnerDashboard() {
+            const token = localStorage.getItem('token');
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (!token || !currentUser) {
+                window.location.href = './login.html';
+                return;
+            }
+
+            fetch('http://localhost:5000/api/dashboard/owner', { headers: { 'Authorization': `Bearer ${token}` } })
+                .then(res => res.json())
+                .then(data => { if (data.message) throw new Error(data.message); updateStats(data); })
+                .catch(err => console.error('Error fetching dashboard stats:', err));
+
+            fetch('http://localhost:5000/api/properties/owner', { headers: { 'Authorization': `Bearer ${token}` } })
+                .then(res => {
+                    console.log('Response status:', res.status);
+                    return res.json();
+                })
+                .then(ownerProperties => { 
+                    console.log('Owner properties:', ownerProperties);
+                    renderProperties(ownerProperties); 
+                })
+                .catch(err => console.error('Error fetching properties:', err));
+        }
+
+        function updateStats(stats) {
+            document.getElementById('statTotalProperties').textContent = stats.totalProperties;
+            document.getElementById('statTotalRevenue').textContent = `৳${(stats.monthlyRevenue || 0).toLocaleString()}`;
+            document.getElementById('statActiveInquiries').textContent = stats.activeInquiries;
+            const occupancyRate = stats.totalProperties > 0 ? ((stats.occupiedCount / stats.totalProperties) * 100).toFixed(0) : 0;
+            document.getElementById('statOccupancyRate').textContent = `${occupancyRate}%`;
+            if (revenueChart) {
+                revenueChart.data.labels = ['Current Month'];
+                revenueChart.data.datasets[0].data = [stats.monthlyRevenue];
+                revenueChart.update();
+            }
+        }
+
+        function renderProperties(properties) {
+            const container = document.getElementById('propertiesOverviewContainer');
+            if (!properties || properties.length === 0) {
+                container.innerHTML = '<p class="text-sm text-gray-500 col-span-full">You have not listed any properties yet.</p>';
+                return;
+            }
+            container.innerHTML = properties.slice(0, 3).map(property => `
+                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div class="relative mb-4">
+                        <img src="http://localhost:5000${property.cover_image || ''}" alt="${property.title}" class="w-full h-48 object-cover rounded-lg bg-gray-200">
+                        <span class="absolute top-2 left-2 px-2 py-1 bg-blue-600 text-white text-xs rounded-full capitalize">${property.status}</span>
+                    </div>
+                    <h4 class="font-semibold text-gray-900 mb-2 truncate">${property.title}</h4>
+                    <p class="text-sm text-gray-600 mb-3"><i class="fas fa-map-marker-alt mr-1"></i>${property.neighborhood || 'Location not set'}</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-lg font-bold text-blue-600">৳${property.monthly_rent.toLocaleString()}/month</span>
+                        <a href="./property-creation.html?id=${property.id}" class="px-3 py-1 bg-gray-200 text-gray-700 text-xs rounded-full hover:bg-gray-300 transition-colors">Edit</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
