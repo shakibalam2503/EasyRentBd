@@ -12,7 +12,7 @@ class GoogleMapsService:
     """Google Maps API integration for geocoding, reverse geocoding, and places search"""
     
     def __init__(self):
-        self.api_key = os.getenv('GOOGLE_MAPS_API_KEY', 'AIzaSyD2eRjLYkpWYq_MPYMSlJRgu1W9Gv_ZqI8')
+        self.api_key = os.getenv('GOOGLE_MAPS_API_KEY')
         self.geocoding_url = "https://maps.googleapis.com/maps/api/geocode/json"
         self.places_url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
         self.places_details_url = "https://maps.googleapis.com/maps/api/place/details/json"
