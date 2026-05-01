@@ -1,0 +1,217 @@
+version: "3.1"
+
+intents:
+  - greet
+  - goodbye
+  - affirm
+  - deny
+  - search_property
+  - landmark_search
+  - show_amenities
+  - get_property_details
+  - compare_properties
+  - get_contact_info
+  - area_information
+  - price_inquiry
+  - test_database
+  - simple_search
+  - reset_search
+  - out_of_scope
+  - ask_help
+  - bot_challenge
+  - chitchat
+  - show_map
+
+entities:
+  - location
+  - thana
+  - landmark
+  - budget
+  - property_type
+  - bedrooms
+  - amenity_type
+  - property_id
+
+slots:
+  location:
+    type: text
+    influence_conversation: true
+    mappings:
+    - type: from_entity
+      entity: location
+    - type: from_entity
+      entity: thana
+
+  budget:
+    type: float
+    influence_conversation: true
+    mappings:
+    - type: from_entity
+      entity: budget
+
+  property_type:
+    type: text
+    influence_conversation: true
+    mappings:
+    - type: from_entity
+      entity: property_type
+
+  bedrooms:
+    type: float
+    influence_conversation: true
+    mappings:
+    - type: from_entity
+      entity: bedrooms
+
+  landmark:
+    type: text
+    influence_conversation: true
+    mappings:
+    - type: from_entity
+      entity: landmark
+
+  amenity_type:
+    type: text
+    influence_conversation: true
+    mappings:
+    - type: from_entity
+      entity: amenity_type
+
+  property_id:
+    type: text
+    influence_conversation: true
+    mappings:
+    - type: from_entity
+      entity: property_id
+
+  search_results:
+    type: any
+    influence_conversation: false
+    mappings:
+    - type: custom
+
+  current_session:
+    type: text
+    influence_conversation: false
+    mappings:
+    - type: custom
+
+  contact_info_shown:
+    type: bool
+    influence_conversation: true
+    mappings:
+    - type: custom
+
+  amenities_shown:
+    type: bool
+    influence_conversation: true
+    mappings:
+    - type: custom
+
+  comparison_shown:
+    type: bool
+    influence_conversation: true
+    mappings:
+    - type: custom
+
+responses:
+  utter_greet:
+  - text: "Hello! I'm your property finder assistant. I can help you search for rental properties in Bangladesh. How can I help you today?"
+  - text: "Hi there! Looking for a perfect rental property? I'm here to help you find the best match for your needs!"
+  - text: "Welcome to EasyRentBD! I can help you discover amazing rental properties across Bangladesh. What are you looking for?"
+
+  utter_goodbye:
+  - text: "Goodbye! Feel free to come back anytime for property assistance. Have a great day!"
+  - text: "Thanks for using EasyRentBD! Hope you find your perfect home soon. Take care!"
+
+  utter_ask_location:
+  - text: "Which area or location are you interested in? You can mention a thana, neighborhood, or nearby landmark."
+  - text: "Where would you like to search for properties? Please specify a location, area, or landmark."
+
+  utter_ask_budget:
+  - text: "What's your budget range for monthly rent? Please specify in BDT (Bangladeshi Taka)."
+  - text: "Could you please tell me your monthly budget for rent in BDT?"
+
+  utter_ask_property_type:
+  - text: "What type of property are you looking for? (apartment, house, flat, studio, etc.)"
+  - text: "Are you looking for an apartment, house, flat, or any specific type of property?"
+
+  utter_ask_bedrooms:
+  - text: "How many bedrooms do you need?"
+  - text: "Could you specify the number of bedrooms you're looking for?"
+
+  utter_help:
+  - text: "I can help you with:\n• Search for properties by location, budget, or landmarks\n• Get detailed property information\n• Find nearby amenities\n• Compare different properties\n• Get owner contact information\n• Area information and statistics"
+
+  utter_out_of_scope:
+  - text: "I'm specialized in helping with property searches. Could you please ask something related to finding rental properties?"
+  - text: "I focus on property-related assistance. How can I help you find a rental property today?"
+
+  utter_no_results:
+  - text: "I couldn't find properties in the specified location. Let me help you with some suggestions."
+
+  utter_search_results:
+  - text: "Great! I found {count} properties matching your criteria. Would you like to see them on a map or get more details?"
+
+  utter_property_details:
+  - text: "Here are the details for the property you selected. Would you like to see nearby amenities or get the owner's contact information?"
+
+  utter_amenities_found:
+  - text: "I found several {amenity_type} near this property. Would you like to see them on a map?"
+
+  utter_contact_provided:
+  - text: "Here's the owner's contact information. You can reach out to them directly to schedule a visit or ask questions."
+
+  utter_comparison_ready:
+  - text: "I've prepared a comparison of the selected properties. Here are the key differences to help you decide."
+
+  utter_area_info:
+  - text: "Here's information about the {location} area including average rent, available properties, and local amenities."
+
+  utter_default:
+  - text: "I understand you're looking for property information. Could you please be more specific about what you need help with?"
+
+  utter_budget_alternatives:
+  - text: "I couldn't find properties exactly at your budget, but I found some great alternatives nearby your price range!"
+  - text: "No exact matches for that budget, but I have some similar options that might interest you!"
+
+  utter_budget_suggestion:
+  - text: "Based on your search, you might want to consider adjusting your budget slightly to see more options."
+  - text: "Here are some properties close to your budget range that might work for you!"
+
+  utter_iamabot:
+  - text: "I am a bot, powered by Rasa."
+
+  utter_ask_continue:
+  - text: "Do you want to continue?"
+
+  utter_chitchat:
+  - text: "Chit-chat is nice, but let's focus on finding you a property."
+
+  utter_map_available:
+  - text: "I can show you the location on a map."
+
+actions:
+  - action_test_database
+  - action_simple_search
+  - action_search_properties
+  - action_budget_alternatives
+  - action_landmark_search  
+  - action_get_property_details
+  - action_show_amenities
+  - action_get_contact_info
+  - action_compare_properties
+  - action_area_information
+  - action_reset_search
+  - action_fallback_search
+  - validate_property_search_form
+
+forms:
+  property_search_form:
+    required_slots:
+    - location
+    - budget
+
+session_config:
+  session_expiration_time: 60
+  carry_over_slots_to_new_session: true
