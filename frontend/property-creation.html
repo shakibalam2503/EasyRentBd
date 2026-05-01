@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Creation - EasyRentBD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes slideInLeft {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes fadeInUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes progressFill {
+            from { width: 0%; }
+            to { width: var(--progress-width); }
+        }
+        
+        .step-enter-right {
+            animation: slideInRight 0.5s ease-out;
+        }
+        
+        .step-enter-left {
+            animation: slideInLeft 0.5s ease-out;
+        }
+        
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        .progress-bar {
+            animation: progressFill 0.8s ease-out;
+        }
+        
+        .image-preview {
+            transition: all 0.3s ease;
+        }
+        
+        .image-preview:hover {
+            transform: scale(1.05);
+        }
+        
+        .form-input {
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15);
+        }
+        
+        .step-indicator {
+            transition: all 0.4s ease;
+        }
+        
+        .step-indicator.active {
+            transform: scale(1.1);
+        }
+        
+        .amenity-checkbox {
+            transition: all 0.2s ease;
+        }
+        
+        .amenity-checkbox:hover {
+            transform: translateY(-1px);
+        }
+        
+        .amenity-checkbox input:checked + .amenity-content {
+            background-color: #dbeafe;
+            border-color: #3b82f6;
+            color: #1d4ed8;
+        }
+        
+        .amenity-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+        
+        .amenity-content:hover {
+            background-color: #f9fafb;
+        }
+        
+        #map {
+            height: 300px;
+            width: 100%;
+            border-radius: 0.5rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <button onclick="goBack()" class="text-gray-600 hover:text-gray-900 transition-colors">
+                        <i class="fas fa-arrow-left text-xl"></i>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-home text-blue-600 text-xl"></i>
+                        <h1 class="text-xl font-semibold text-gray-900" id="pageTitle">Create New Property</h1>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button onclick="saveDraft()" class="text-gray-600 hover:text-gray-900 transition-colors">
+                        <i class="fas fa-save mr-2"></i>Save Draft
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="mb-8 fade-in-up">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-4">
+                    <div class="step-indicator active flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 text-white font-semibold" id="step1-indicator">1</div>
+                    <div class="step-indicator flex items-center justify-center w-10 h-10 rounded-full bg-gray-300 text-gray-600 font-semibold" id="step2-indicator">2</div>
+                    <div class="step-indicator flex items-center justify-center w-10 h-10 rounded-full bg-gray-300 text-gray-600 font-semibold" id="step3-indicator">3</div>
+                    <div class="step-indicator flex items-center justify-center w-10 h-10 rounded-full bg-gray-300 text-gray-600 font-semibold" id="step4-indicator">4</div>
+                </div>
+                <span class="text-sm text-gray-600" id="stepCounter">Step 1 of 4</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="progress-bar bg-blue-600 h-2 rounded-full" style="--progress-width: 25%; width: 25%;" id="progressBar"></div>
+            </div>
+            <div class="flex justify-between text-xs text-gray-500 mt-2">
+                <span>Basic Info</span>
+                <span>Property Details</span>
+                <span>Location & Amenities</span>
+                <span>Photos & Media</span>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div id="step1" class="step-content p-8">
+                <div class="fade-in-up">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Basic Information</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Property Title *</label>
+                            <input type="text" id="propertyTitle" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., Modern 2BR Apartment in Gulshan">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Description *</label>
+                            <textarea id="propertyDescription" rows="4" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Describe your property in detail..."></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Property Type *</label>
+                            <select id="propertyType" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">Select property type</option>
+                                <option value="apartment">Apartment</option>
+                                <option value="house">House</option>
+                                <option value="condo">Condo</option>
+                                <option value="studio">Studio</option>
+                                <option value="duplex">Duplex</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Listing Type *</label>
+                            <select id="listingType" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">Select listing type</option>
+                                <option value="rent">For Rent</option>
+                                <option value="sale">For Sale</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="step2" class="step-content p-8 hidden">
+                <div class="fade-in-up">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Property Details</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Bedrooms *</label>
+                            <select id="bedrooms" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">Select</option>
+                                <option value="0">Studio</option>
+                                <option value="1">1 Bedroom</option>
+                                <option value="2">2 Bedrooms</option>
+                                <option value="3">3 Bedrooms</option>
+                                <option value="4">4 Bedrooms</option>
+                                <option value="5+">5+ Bedrooms</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Bathrooms *</label>
+                            <select id="bathrooms" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">Select</option>
+                                <option value="1">1 Bathroom</option>
+                                <option value="1.5">1.5 Bathrooms</option>
+                                <option value="2">2 Bathrooms</option>
+                                <option value="2.5">2.5 Bathrooms</option>
+                                <option value="3">3 Bathrooms</option>
+                                <option value="3+">3+ Bathrooms</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Square Feet</label>
+                            <input type="number" id="squareFeet" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 1200">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Monthly Rent (BDT) *</label>
+                            <input type="number" id="monthlyRent" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 25000">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Security Deposit (BDT)</label>
+                            <input type="number" id="securityDeposit" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 50000">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Available From</label>
+                            <input type="date" id="availableFrom" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                    </div>
+                    <div class="mt-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Additional Options</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <label class="amenity-checkbox flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="checkbox" id="petsAllowed" class="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <div>
+                                    <div class="font-medium text-gray-900">Pets Allowed</div>
+                                    <div class="text-sm text-gray-500">Allow tenants to have pets</div>
+                                </div>
+                            </label>
+                            <label class="amenity-checkbox flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="checkbox" id="furnished" class="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <div>
+                                    <div class="font-medium text-gray-900">Furnished</div>
+                                    <div class="text-sm text-gray-500">Property comes furnished</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="step3" class="step-content p-8 hidden">
+                <div class="fade-in-up">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Location & Amenities</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Full Address *</label>
+                            <input type="text" id="fullAddress" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., House 123, Road 45, Gulshan 2, Dhaka" onblur="geocodeAddress()">
+                            <p class="text-xs text-gray-500 mt-1">Address will be used to pinpoint location on map</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Area/Neighborhood *</label>
+                            <input type="text" id="neighborhood" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., Gulshan">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">City *</label>
+                            <input type="text" id="city" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., Dhaka">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">City *</label>
+                            <input type="text" id="city" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., Dhaka">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Location on Map</label>
+                        <p class="text-sm text-gray-600 mb-4">Click on the map or drag the marker to set the exact property location. The address will be auto-filled based on the selected location.</p>
+                        <div id="map" class="bg-gray-200 rounded-lg flex items-center justify-center"></div>
+                        <div class="mt-2 flex items-center text-sm text-gray-500">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            <span>Precise location helps tenants find your property easily</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-8">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Amenities</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <label class="amenity-checkbox cursor-pointer">
+                                <input type="checkbox" name="amenity" value="WiFi" class="hidden">
+                                <div class="amenity-content">
+                                    <i class="fas fa-wifi text-xl text-gray-600 mb-2"></i>
+                                    <span class="font-medium text-gray-900">WiFi</span>
+                                </div>
+                            </label>
+                            <label class="amenity-checkbox cursor-pointer">
+                                <input type="checkbox" name="amenity" value="Parking" class="hidden">
+                                <div class="amenity-content">
+                                    <i class="fas fa-car text-xl text-gray-600 mb-2"></i>
+                                    <span class="font-medium text-gray-900">Parking</span>
+                                </div>
+                            </label>
+                            <label class="amenity-checkbox cursor-pointer">
+                                <input type="checkbox" name="amenity" value="Air Conditioning" class="hidden">
+                                <div class="amenity-content">
+                                    <i class="fas fa-wind text-xl text-gray-600 mb-2"></i>
+                                    <span class="font-medium text-gray-900">Air Conditioning</span>
+                                </div>
+                            </label>
+                            <label class="amenity-checkbox cursor-pointer">
+                                <input type="checkbox" name="amenity" value="TV/Cable" class="hidden">
+                                <div class="amenity-content">
+                                    <i class="fas fa-tv text-xl text-gray-600 mb-2"></i>
+                                    <span class="font-medium text-gray-900">TV/Cable</span>
+                                </div>
+                            </label>
+                            <label class="amenity-checkbox cursor-pointer">
+                                <input type="checkbox" name="amenity" value="Kitchen" class="hidden">
+                                <div class="amenity-content">
+                                    <i class="fas fa-utensils text-xl text-gray-600 mb-2"></i>
+                                    <span class="font-medium text-gray-900">Kitchen</span>
+                                </div>
+                            </label>
+                            <label class="amenity-checkbox cursor-pointer">
+                                <input type="checkbox" name="amenity" value="Laundry" class="hidden">
+                                <div class="amenity-content">
+                                    <i class="fas fa-washer text-xl text-gray-600 mb-2"></i>
+                                    <span class="font-medium text-gray-900">Laundry</span>
+                                </div>
+                            </label>
+                            <label class="amenity-checkbox cursor-pointer">
+                                <input type="checkbox" name="amenity" value="Balcony" class="hidden">
+                                <div class="amenity-content">
+                                    <i class="fas fa-tree text-xl text-gray-600 mb-2"></i>
+                                    <span class="font-medium text-gray-900">Balcony</span>
+                                </div>
+                            </label>
+                            <label class="amenity-checkbox cursor-pointer">
+                                <input type="checkbox" name="amenity" value="Security" class="hidden">
+                                <div class="amenity-content">
+                                    <i class="fas fa-shield-alt text-xl text-gray-600 mb-2"></i>
+                                    <span class="font-medium text-gray-900">Security</span>
+                                </div>
+                            </label>
+                            <label class="amenity-checkbox cursor-pointer">
+                                <input type="checkbox" name="amenity" value="Furnished" class="hidden">
+                                <div class="amenity-content">
+                                    <i class="fas fa-couch text-xl text-gray-600 mb-2"></i>
+                                    <span class="font-medium text-gray-900">Furnished</span>
+                                </div>
+                            </label>
+                            <label class="amenity-checkbox cursor-pointer">
+                                <input type="checkbox" name="amenity" value="Gym/Fitness" class="hidden">
+                                <div class="amenity-content">
+                                    <i class="fas fa-dumbbell text-xl text-gray-600 mb-2"></i>
+                                    <span class="font-medium text-gray-900">Gym/Fitness</span>
+                                </div>
+                            </label>
+                            <label class="amenity-checkbox cursor-pointer">
+                                <input type="checkbox" name="amenity" value="Swimming Pool" class="hidden">
+                                <div class="amenity-content">
+                                    <i class="fas fa-swimming-pool text-xl text-gray-600 mb-2"></i>
+                                    <span class="font-medium text-gray-900">Swimming Pool</span>
+                                </div>
+                            </label>
+                            <label class="amenity-checkbox cursor-pointer">
+                                <input type="checkbox" name="amenity" value="Elevator" class="hidden">
+                                <div class="amenity-content">
+                                    <i class="fas fa-elevator text-xl text-gray-600 mb-2"></i>
+                                    <span class="font-medium text-gray-900">Elevator</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Available From</label>
+                        <input type="date" id="availableFrom" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                </div>
+            </div>
+
+            <div id="step4" class="step-content p-8 hidden">
+                <div class="fade-in-up">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Photos & Media</h2>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Property Photos</label>
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
+                            <input type="file" id="propertyPhotos" multiple accept="image/*" class="hidden" onchange="handleFileUpload(event)">
+                            <div class="cursor-pointer" onclick="document.getElementById('propertyPhotos').click()">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                                <p class="text-lg font-medium text-gray-900 mb-2">Upload Property Photos</p>
+                                <p class="text-sm text-gray-500">Drag and drop files here, or click to select files</p>
+                                <p class="text-xs text-gray-400 mt-2">PNG, JPG, GIF up to 10MB each</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="photoPreview" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6 hidden">
+                        </div>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-blue-600 mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-medium text-blue-900">Photo Tips</h4>
+                                <ul class="text-sm text-blue-700 mt-1 space-y-1">
+                                    <li>• Upload at least 5 high-quality photos</li>
+                                    <li>• Include photos of all rooms, exterior, and amenities</li>
+                                    <li>• The first photo will be used as the cover image</li>
+                                    <li>• Good lighting makes a big difference</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-8 py-6 bg-gray-50 border-t border-gray-200 flex justify-between">
+                <button id="prevBtn" onclick="previousStep()" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors hidden">
+                    <i class="fas fa-arrow-left mr-2"></i>Previous
+                </button>
+                <div class="flex space-x-4 ml-auto">
+                    <button onclick="saveDraft()" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-save mr-2"></i>Save Draft
+                    </button>
+                    <button id="nextBtn" onclick="nextStep()" class="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                        Next <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 4;
+        let uploadedFiles = [];
+
+        // Check if editing existing property
+        const urlParams = new URLSearchParams(window.location.search);
+        const propertyId = urlParams.get('id');
+        
+        if (propertyId) {
+            document.getElementById('pageTitle').textContent = 'Edit Property';
+            document.getElementById('nextBtn').innerHTML = '<i class="fas fa-save mr-2"></i>Update Property';
+        }
+
+        function updateProgress() {
+            const progressPercentage = (currentStep / totalSteps) * 100;
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.setProperty('--progress-width', progressPercentage + '%');
+            progressBar.style.width = progressPercentage + '%';
+            
+            document.getElementById('stepCounter').textContent = `Step ${currentStep} of ${totalSteps}`;
+            
+            // Update step indicators
+            for (let i = 1; i <= totalSteps; i++) {
+                const indicator = document.getElementById(`step${i}-indicator`);
+                if (i <= currentStep) {
+                    indicator.className = 'step-indicator active flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 text-white font-semibold';
+                } else {
+                    indicator.className = 'step-indicator flex items-center justify-center w-10 h-10 rounded-full bg-gray-300 text-gray-600 font-semibold';
+                }
+            }
+        }
+
+        function showStep(step) {
+            // Hide all steps
+            for (let i = 1; i <= totalSteps; i++) {
+                document.getElementById(`step${i}`).classList.add('hidden');
+            }
+            
+            // Show current step with animation
+            const currentStepElement = document.getElementById(`step${step}`);
+            currentStepElement.classList.remove('hidden');
+            
+            // Add animation class based on direction
+            if (step > currentStep) {
+                currentStepElement.classList.add('step-enter-right');
+            } else {
+                currentStepElement.classList.add('step-enter-left');
+            }
+            
+            // Remove animation class after animation completes
+            setTimeout(() => {
+                currentStepElement.classList.remove('step-enter-right', 'step-enter-left');
+            }, 500);
+            
+            // Update navigation buttons
+            document.getElementById('prevBtn').classList.toggle('hidden', step === 1);
+            
+            const nextBtn = document.getElementById('nextBtn');
+            if (step === totalSteps) {
+                nextBtn.innerHTML = propertyId ? 
+                    '<i class="fas fa-save mr-2"></i>Update Property' : 
+                    '<i class="fas fa-plus mr-2"></i>Create Property';
+            } else {
+                nextBtn.innerHTML = 'Next <i class="fas fa-arrow-right ml-2"></i>';
+            }
+        }
+
+        function nextStep() {
+            if (currentStep < totalSteps) {
+                if (validateCurrentStep()) {
+                    currentStep++;
+                    showStep(currentStep);
+                    updateProgress();
+                }
+            } else {
+                submitForm();
+            }
+        }
+
+        function previousStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                showStep(currentStep);
+                updateProgress();
+            }
+        }
+
+        function validateCurrentStep() {
+            const requiredFields = {
+                1: ['propertyTitle', 'propertyDescription', 'propertyType', 'listingType'],
+                2: ['bedrooms', 'bathrooms', 'monthlyRent'],
+                3: ['fullAddress', 'neighborhood', 'city'],
+                4: []
+            };
+
+            const fields = requiredFields[currentStep];
+            let isValid = true;
+
+            fields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (!field.value.trim()) {
+                    field.classList.add('border-red-500');
+                    isValid = false;
+                } else {
+                    field.classList.remove('border-red-500');
+                }
+            });
+
+            if (!isValid) {
+                alert('Please fill in all required fields before proceeding.');
+            }
+
+            return isValid;
+        }
+
+        function handleFileUpload(event) {
+            const files = Array.from(event.target.files);
+            uploadedFiles = [...uploadedFiles, ...files];
+            
+            const previewContainer = document.getElementById('photoPreview');
+            previewContainer.classList.remove('hidden');
+            previewContainer.innerHTML = '';
+
+            uploadedFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const photoDiv = document.createElement('div');
+                    photoDiv.className = 'image-preview relative group';
+                    photoDiv.innerHTML = `
+                        <img src="${e.target.result}" alt="Property photo" class="w-full h-32 object-cover rounded-lg">
+                        <button onclick="removePhoto(${index})" class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <i class="fas fa-times text-xs"></i>
+                        </button>
+                        ${index === 0 ? '<div class="absolute bottom-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">Cover Photo</div>' : ''}
+                    `;
+                    previewContainer.appendChild(photoDiv);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function removePhoto(index) {
+            uploadedFiles.splice(index, 1);
+            handleFileUpload({ target: { files: uploadedFiles } });
+        }
+
+        function saveDraft() {
+            const formData = collectFormData();
+            localStorage.setItem('propertyDraft', JSON.stringify(formData));
+            
+            // Show success message
+            const originalText = event.target.innerHTML;
+            event.target.innerHTML = '<i class="fas fa-check mr-2"></i>Saved!';
+            event.target.classList.add('bg-green-600');
+            
+            setTimeout(() => {
+                event.target.innerHTML = originalText;
+                event.target.classList.remove('bg-green-600');
+            }, 2000);
+        }
+
+        function collectFormData() {
+            const formData = {
+                propertyTitle: document.getElementById('propertyTitle').value,
+                propertyDescription: document.getElementById('propertyDescription').value,
+                propertyType: document.getElementById('propertyType').value,
+                listingType: document.getElementById('listingType').value,
+                bedrooms: document.getElementById('bedrooms').value,
+                bathrooms: document.getElementById('bathrooms').value,
+                squareFeet: document.getElementById('squareFeet').value,
+                monthlyRent: document.getElementById('monthlyRent').value,
+                securityDeposit: document.getElementById('securityDeposit').value,
+                availableFrom: document.getElementById('availableFrom').value,
+                petsAllowed: document.getElementById('petsAllowed').checked,
+                furnished: document.getElementById('furnished').checked, // This is the main furnished checkbox
+                fullAddress: document.getElementById('fullAddress').value,
+                neighborhood: document.getElementById('neighborhood').value,
+                city: document.getElementById('city').value,
+                amenities: []
+            };
+            
+            // Add coordinates if available
+            if (selectedCoordinates) {
+                formData.latitude = selectedCoordinates.latitude;
+                formData.longitude = selectedCoordinates.longitude;
+            } else {
+                // Check for hidden coordinate fields
+                const latField = document.getElementById('latitude');
+                const lngField = document.getElementById('longitude');
+                if (latField && lngField && latField.value && lngField.value) {
+                    formData.latitude = parseFloat(latField.value);
+                    formData.longitude = parseFloat(lngField.value);
+                }
+            }
+            
+            // Collect amenities from the grid of checkboxes in Step 3
+            document.querySelectorAll('#step3 input[name="amenity"]:checked').forEach(checkbox => {
+                const amenityName = checkbox.value;
+                formData.amenities.push(amenityName);
+            });
+
+            // The main 'furnished' checkbox in Step 2 is handled separately
+            if (formData.furnished && !formData.amenities.includes('Furnished')) {
+                 formData.amenities.push('Furnished');
+            }
+
+            return formData;
+        }
+
+        async function submitForm() {
+            if (!validateCurrentStep()) return;
+            
+            const token = localStorage.getItem('token');
+            const formData = collectFormData();
+            
+            const submitBtn = document.getElementById('nextBtn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+            submitBtn.disabled = true;
+
+            try {
+                let propertyResponse;
+                if (propertyId) {
+                    // Update existing property
+                    const response = await fetch(`http://localhost:5000/api/properties/${propertyId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                    propertyResponse = await response.json();
+                    if (!response.ok) throw new Error(propertyResponse.message);
+
+                } else {
+                    // Create new property
+                    const response = await fetch('http://localhost:5000/api/properties', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                    propertyResponse = await response.json();
+                    if (!response.ok) throw new Error(propertyResponse.message);
+                }
+
+                const currentPropertyId = propertyId || propertyResponse.propertyId;
+
+                // Step 2: Upload photos if any
+                if (uploadedFiles.length > 0) {
+                    await uploadPhotos(currentPropertyId, token);
+                }
+
+                alert(propertyId ? 'Property updated successfully!' : 'Property created successfully!');
+                window.location.href = './PropertyManagement.html'; // Redirect to property list
+
+            } catch (error) {
+                console.error('Form submission error:', error);
+                alert(`Error: ${error.message}`);
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        async function uploadPhotos(propertyId, token) {
+            const photoFormData = new FormData();
+            uploadedFiles.forEach(file => {
+                photoFormData.append('propertyPhotos', file);
+            });
+
+            const response = await fetch(`http://localhost:5000/api/properties/${propertyId}/images`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: photoFormData
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to upload photos.');
+            }
+
+            return await response.json();
+        }
+
+        function goBack() {
+            if (confirm('Are you sure you want to leave? Any unsaved changes will be lost.')) {
+                window.history.back();
+            }
+        }
+
+        // Load draft data or existing property data
+        window.addEventListener('load', async function() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = './login.html';
+                return;
+            }
+
+            if (propertyId) {
+                // Edit mode: Fetch existing property data
+                fetch(`http://localhost:5000/api/properties/${propertyId}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.message) throw new Error(data.message);
+                        populateForm(data);
+                    })
+                    .catch(err => {
+                        console.error('Failed to load property data:', err);
+                        alert('Failed to load property data.');
+                    });
+            } else {
+                // Create mode: Load from draft if available
+                const draft = localStorage.getItem('propertyDraft');
+                if (draft) {
+                    const data = JSON.parse(draft);
+                    populateForm(data);
+                }
+            }
+            
+            // Initialize map after page loads
+            await loadGoogleMapsScript();
+        });
+
+        function populateForm(data) {
+            // Populate form fields with data
+            document.getElementById('propertyTitle').value = data.title || '';
+            document.getElementById('propertyDescription').value = data.description || '';
+            document.getElementById('propertyType').value = data.property_type || '';
+            document.getElementById('listingType').value = data.listing_type || '';
+            document.getElementById('bedrooms').value = data.bedrooms || '';
+            document.getElementById('bathrooms').value = data.bathrooms || '';
+            document.getElementById('squareFeet').value = data.square_feet || '';
+            document.getElementById('monthlyRent').value = data.monthly_rent || '';
+            document.getElementById('securityDeposit').value = data.security_deposit || '';
+            document.getElementById('availableFrom').value = data.available_from ? new Date(data.available_from).toISOString().split('T')[0] : '';
+            document.getElementById('petsAllowed').checked = data.pets_allowed || false;
+            document.getElementById('furnished').checked = data.furnished || false;
+            document.getElementById('fullAddress').value = data.full_address || '';
+            document.getElementById('neighborhood').value = data.neighborhood || '';
+            document.getElementById('city').value = data.city || '';
+            
+            // Handle amenities
+            if (data.amenities) {
+                document.querySelectorAll('#step3 input[name="amenity"]').forEach(checkbox => {
+                    if (data.amenities.includes(checkbox.value)) {
+                        checkbox.checked = true;
+                    }
+                });
+            }
+        }
+
+        // Initialize progress on first load
+        updateProgress();
+    </script>
+    <script>
+        let map;
+        let mapMarker;
+        let mapsApiKey = null;
+        let selectedCoordinates = null;
+        let geocoder = null;
+
+        async function loadMapsApiKey() {
+            try {
+                const response = await fetch('http://localhost:5000/api/location/config/maps-key');
+                const data = await response.json();
+                mapsApiKey = data.apiKey;
+                return mapsApiKey;
+            } catch (error) {
+                console.error('Failed to load Google Maps API key:', error);
+                return null;
+            }
+        }
+
+        async function initMap() {
+            // Load API key first
+            if (!mapsApiKey) {
+                mapsApiKey = await loadMapsApiKey();
+            }
+
+            if (!mapsApiKey || mapsApiKey === 'YOUR_GOOGLE_MAPS_API_KEY') {
+                console.error('Google Maps API key not configured.');
+                document.getElementById('map').innerHTML = `
+                    <div class="flex items-center justify-center h-full text-gray-500">
+                        <div class="text-center">
+                            <i class="fas fa-map-marked-alt text-4xl mb-2"></i>
+                            <p class="text-sm font-medium mb-1">Map Unavailable</p>
+                            <p class="text-xs">Google Maps API key not configured</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            if (typeof google === 'undefined' || !google.maps) {
+                console.error('Google Maps API not loaded.');
+                document.getElementById('map').innerHTML = `
+                    <div class="flex items-center justify-center h-full text-gray-500">
+                        <div class="text-center">
+                            <i class="fas fa-map-marked-alt text-4xl mb-2"></i>
+                            <p class="text-sm font-medium mb-1">Map Loading Failed</p>
+                            <p class="text-xs">Please check your internet connection</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const initialLocation = { lat: 23.8103, lng: 90.4125 }; // Default to Dhaka
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 12,
+                center: initialLocation,
+                mapTypeControl: false,
+                streetViewControl: false
+            });
+
+            geocoder = new google.maps.Geocoder();
+
+            mapMarker = new google.maps.Marker({
+                position: initialLocation,
+                map: map,
+                draggable: true,
+                title: 'Drag to set property location'
+            });
+
+            // Add click listener to map
+            map.addListener('click', function(event) {
+                const lat = event.latLng.lat();
+                const lng = event.latLng.lng();
+                updateMarkerPosition(lat, lng);
+            });
+
+            mapMarker.addListener('dragend', function(event) {
+                const lat = event.latLng.lat();
+                const lng = event.latLng.lng();
+                updateMarkerPosition(lat, lng);
+            });
+
+            // Initialize with existing coordinates if editing
+            const existingLat = document.getElementById('latitude')?.value;
+            const existingLng = document.getElementById('longitude')?.value;
+            if (existingLat && existingLng) {
+                updateMarkerPosition(parseFloat(existingLat), parseFloat(existingLng));
+            }
+        }
+
+        async function updateMarkerPosition(lat, lng) {
+            const position = { lat: lat, lng: lng };
+            mapMarker.setPosition(position);
+            map.setCenter(position);
+            selectedCoordinates = { latitude: lat, longitude: lng };
+
+            // Update hidden coordinate fields
+            updateCoordinateFields(lat, lng);
+
+            // Perform reverse geocoding to get address
+            await reverseGeocodeLocation(lat, lng);
+        }
+
+        async function reverseGeocodeLocation(lat, lng) {
+            try {
+                const token = localStorage.getItem('token');
+                const requestBody = { latitude: lat, longitude: lng };
+                console.log('Reverse Geocode Request:', requestBody);
+                const response = await fetch('http://localhost:5000/api/location/reverse-geocode', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const result = await response.json();
+                console.log('Reverse Geocode Response:', result);
+                if (result.success) {
+                    const location = result.location;
+                    
+                    // Auto-fill address fields
+                    if (location.formatted_address) {
+                        document.getElementById('fullAddress').value = location.formatted_address;
+                    }
+                    if (location.thana) {
+                        document.getElementById('neighborhood').value = location.thana;
+                    }
+                    if (location.district) {
+                        document.getElementById('city').value = location.district;
+                    }
+
+                    // Show notification
+                    showLocationNotification('Address auto-filled from map location');
+                } else {
+                    console.warn('Reverse geocoding failed:', result.message);
+                }
+            } catch (error) {
+                console.error('Reverse geocoding error:', error);
+            }
+        }
+
+        function updateCoordinateFields(lat, lng) {
+            // Add hidden coordinate fields if they don't exist
+            if (!document.getElementById('latitude')) {
+                const latInput = document.createElement('input');
+                latInput.type = 'hidden';
+                latInput.id = 'latitude';
+                latInput.name = 'latitude';
+                document.getElementById('step3').appendChild(latInput);
+            }
+            if (!document.getElementById('longitude')) {
+                const lngInput = document.createElement('input');
+                lngInput.type = 'hidden';
+                lngInput.id = 'longitude';
+                lngInput.name = 'longitude';
+                document.getElementById('step3').appendChild(lngInput);
+            }
+
+            document.getElementById('latitude').value = lat;
+            document.getElementById('longitude').value = lng;
+        }
+
+        function showLocationNotification(message) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 fade-in-up';
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-map-marker-alt mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Function to geocode address when user types
+        async function geocodeAddress() {
+            const address = document.getElementById('fullAddress').value;
+            if (!address || address.length < 10) return;
+
+            try {
+                const token = localStorage.getItem('token');
+                const requestBody = { address: address };
+                console.log('Geocode Request:', requestBody);
+                const response = await fetch('http://localhost:5000/api/location/geocode', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const result = await response.json();
+                console.log('Geocode Response:', result);
+                if (result.success) {
+                    const location = result.location;
+                    updateMarkerPosition(location.latitude, location.longitude);
+                    
+                    // Auto-fill other fields
+                    if (location.thana) {
+                        document.getElementById('neighborhood').value = location.thana;
+                    }
+                    if (location.district) {
+                        document.getElementById('city').value = location.district;
+                    }
+
+                    showLocationNotification('Location found on map');
+                } else {
+                    console.warn('Geocoding failed:', result.message);
+                }
+            } catch (error) {
+                console.error('Geocoding error:', error);
+            }
+        }
+
+        async function loadGoogleMapsScript() {
+            if (!mapsApiKey) {
+                mapsApiKey = await loadMapsApiKey();
+            }
+
+            if (mapsApiKey && mapsApiKey !== 'YOUR_GOOGLE_MAPS_API_KEY') {
+                const script = document.createElement('script');
+                script.src = `https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}&callback=initMap`;
+                script.async = true;
+                script.defer = true;
+                document.head.appendChild(script);
+            } else {
+                // If no API key, still initialize the map placeholder
+                initMap();
+            }
+        }
+
+        // Load the map when the page loads
+        window.addEventListener('load', loadGoogleMapsScript);
+    </script>
+</body>
+</html>

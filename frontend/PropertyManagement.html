@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            z-index: 10;
+            right: 0;
+            top: 100%;
+            display: none;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .dropdown-menu.open {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+        .dropdown-item:hover {
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8 space-y-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between space-y-4 md:space-y-0">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">My Properties</h1>
+                <p class="text-gray-600 mt-1">Manage your rental property portfolio</p>
+            </div>
+            <div class="flex space-x-4">
+                <a href="./property-creation.html">
+                    <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center space-x-2">
+                        <i class="fas fa-plus w-4 h-4"></i>
+                        <span>Add Property</span>
+                    </button>
+                </a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="bg-white p-6 rounded-md shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Total Properties</p>
+                        <p id="totalProperties" class="text-2xl font-bold text-gray-900"></p>
+                    </div>
+                    <i class="fas fa-home w-8 h-8 text-blue-500"></i>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-md shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Monthly Revenue</p>
+                        <p id="monthlyRevenue" class="text-2xl font-bold text-green-600"></p>
+                    </div>
+                    <i class="fas fa-dollar-sign w-8 h-8 text-green-500"></i>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-md shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">In Maintenance</p>
+                        <p id="maintenanceCount" class="text-2xl font-bold text-yellow-600"></p>
+                    </div>
+                    <i class="fas fa-tools w-8 h-8 text-yellow-500"></i>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-md shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Draft</p>
+                        <p id="draftCount" class="text-2xl font-bold text-gray-600"></p>
+                    </div>
+                    <i class="fas fa-edit w-8 h-8 text-gray-500"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-md shadow-sm">
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="relative flex-1">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"></i>
+                    <input type="text" id="searchInput" placeholder="Search properties by title or location..." class="w-full pl-10 pr-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <select id="statusFilter" class="w-full md:w-48 px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                    <option value="all">All Status</option>
+                    <option value="maintenance">Maintenance</option>
+                    <option value="draft">Draft</option>
+                </select>
+                
+                <select id="typeFilter" class="w-full md:w-48 px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                    <option value="all">All Types</option>
+                    <option value="apartment">Apartment</option>
+                    <option value="house">House</option>
+                    <option value="studio">Studio</option>
+                    <option value="room">Room</option>
+                </select>
+
+                <div class="flex border rounded-md">
+                    <button id="gridViewBtn" class="px-3 py-2 rounded-l-md bg-blue-600 text-white hover:bg-blue-700 transition-colors">Grid</button>
+                    <button id="listViewBtn" class="px-3 py-2 rounded-r-md text-gray-700 hover:bg-gray-100 transition-colors">List</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-md shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-900">Properties (<span id="propertyCount"></span>)</h2>
+            </div>
+            
+            <div id="propertiesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // Performance optimization: Cache DOM elements
+        const domCache = {
+            propertiesContainer: document.getElementById('propertiesContainer'),
+            searchInput: document.getElementById('searchInput'),
+            statusFilter: document.getElementById('statusFilter'),
+            typeFilter: document.getElementById('typeFilter'),
+            gridViewBtn: document.getElementById('gridViewBtn'),
+            listViewBtn: document.getElementById('listViewBtn'),
+            totalPropertiesEl: document.getElementById('totalProperties'),
+            monthlyRevenueEl: document.getElementById('monthlyRevenue'),
+            maintenanceCountEl: document.getElementById('maintenanceCount'),
+            draftCountEl: document.getElementById('draftCount'),
+            propertyCountEl: document.getElementById('propertyCount')
+        };
+
+        let ownerProperties = [];
+        const { propertiesContainer, searchInput, statusFilter, typeFilter, 
+                gridViewBtn, listViewBtn, totalPropertiesEl, 
+                monthlyRevenueEl, propertyCountEl } = domCache;
+
+        let viewMode = 'grid';
+
+        // Performance: Request animation frame for smooth updates
+        function smoothUpdate(callback) {
+            requestAnimationFrame(callback);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+
+            if (!token || !currentUser || currentUser.role !== 'owner') {
+                window.location.href = './login.html';
+                return;
+            }
+
+            setupEventListeners();
+            fetchAndRenderProperties();
+            loadDashboardStats();
+        });
+
+        function fetchAndRenderProperties() {
+            const token = localStorage.getItem('token');
+            
+            const searchTerm = searchInput.value;
+            const status = statusFilter.value;
+            const type = typeFilter.value;
+
+            const query = new URLSearchParams({
+                search: searchTerm,
+                status: status !== 'all' ? status : '',
+                type: type !== 'all' ? type : ''
+            }).toString();
+
+            console.log('Fetching properties with query:', query);
+            console.log('Full URL:', `http://localhost:5000/api/properties/owner?${query}`);
+
+            // Show loading state
+            propertiesContainer.innerHTML = `
+                <div class="text-center py-12 col-span-full">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p class="text-gray-600">Loading properties...</p>
+                </div>
+            `;
+
+            fetch(`http://localhost:5000/api/properties/owner?${query}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
+            .then(properties => {
+                ownerProperties = properties;
+                renderProperties();
+            })
+            .catch(err => {
+                console.error('Error fetching properties:', err);
+                propertiesContainer.innerHTML = `
+                    <div class="text-center py-12 col-span-full">
+                        <i class="fas fa-exclamation-triangle w-16 h-16 text-red-400 mx-auto mb-4"></i>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Error loading properties</h3>
+                        <p class="text-gray-600 mb-4">There was an error loading your properties. Please try again.</p>
+                        <button onclick="fetchAndRenderProperties()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                            Retry
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+
+        function getStatusBadge(status) {
+            switch (status) {
+                case 'maintenance':
+                    return `<span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded-full">Maintenance</span>`;
+                case 'draft':
+                    return `<span class="bg-gray-100 text-gray-800 text-xs font-semibold px-2 py-1 rounded-full">Draft</span>`;
+                default:
+                    return `<span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded-full">Available</span>`;
+            }
+        }
+
+        function getIcon(iconClass, text) {
+            return `<span class="flex items-center text-gray-500"><i class="${iconClass} w-4 h-4 mr-1"></i>${text}</span>`;
+        }
+
+        function renderProperty(property) {
+            const statusBadge = getStatusBadge(property.status);
+            const isInMaintenance = property.status === 'maintenance';
+
+            if (viewMode === 'grid') {
+                return `
+                    <div class="bg-white rounded-md shadow-sm overflow-hidden card-hover">
+                        <div class="relative">
+                            <img src="http://localhost:5000${property.cover_image || ''}" alt="${property.title}" class="w-full h-48 object-cover bg-gray-200">
+                            <div class="absolute top-2 left-2">
+                                ${statusBadge}
+                            </div>
+                            <div class="absolute top-2 right-2">
+                                <button class="more-options-btn bg-white text-gray-700 px-2 py-1 rounded-full shadow-md text-xs" data-property-id="${property.id}">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <div class="dropdown-item" data-action="view" data-property-id="${property.id}"><i class="fas fa-eye w-4 h-4 mr-2"></i>View Details</div>
+                                    <a href="./property-creation.html?id=${property.id}" class="dropdown-item" data-action="edit"><i class="fas fa-edit w-4 h-4 mr-2"></i>Edit Property</a>
+                                    <div class="dropdown-item" data-action="duplicate" data-property-id="${property.id}"><i class="fas fa-copy w-4 h-4 mr-2"></i>Duplicate</div>
+                                    <div class="dropdown-item text-red-600" data-action="delete" data-property-id="${property.id}"><i class="fas fa-trash w-4 h-4 mr-2"></i>Delete</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <h3 class="font-semibold text-lg mb-2 truncate">${property.title}</h3>
+                            <p class="text-gray-600 text-sm mb-3 flex items-center"><i class="fas fa-map-marker-alt w-4 h-4 mr-1"></i>${property.location || 'Location not set'}</p>
+                            
+                            <div class="flex items-center space-x-4 text-sm text-gray-500 mb-3">
+                                ${getIcon('fas fa-bed', property.bedrooms || 'Studio')}
+                                ${getIcon('fas fa-bath', property.bathrooms)}
+                                ${getIcon('fas fa-ruler-combined', `${property.square_feet} sqft`)}
+                            </div>
+
+                            ${isInMaintenance ? `
+                                <div class="bg-yellow-50 p-2 rounded-md mb-3">
+                                    <p class="text-sm text-yellow-800"><i class="fas fa-tools w-4 h-4 inline mr-1"></i>Under Maintenance</p>
+                                    <p class="text-xs text-yellow-600">Status: Temporarily Unavailable</p>
+                                </div>
+                            ` : ''}
+
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xl font-bold text-blue-600">৳${property.monthly_rent.toLocaleString()}/month</span>
+                            </div>
+                            
+                            <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                                ${getIcon('fas fa-eye', `${property.views || 0} views`)}
+                                ${getIcon('fas fa-comment-dots', `${property.inquiries || 0} inquiries`)}
+                            </div>
+
+                            <div class="flex space-x-2">
+                                <a href="./property-details.html?id=${property.id}" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-md font-medium text-center hover:bg-gray-300 transition-colors">View Details</a>
+                                <a href="./property-creation.html?id=${property.id}" class="flex-1 bg-blue-600 text-white py-2 rounded-md font-medium text-center hover:bg-blue-700 transition-colors">Edit</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else { // List view
+                return `
+                    <div class="border rounded-md p-4 hover:shadow-md transition-shadow">
+                        <div class="flex items-center space-x-4">
+                            <img src="http://localhost:5000${property.cover_image || ''}" alt="${property.title}" class="w-24 h-24 rounded object-cover bg-gray-200">
+                            <div class="flex-1">
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <h3 class="font-semibold text-lg">${property.title}</h3>
+                                        <p class="text-gray-600 text-sm mb-2">${property.location || 'Location not set'}</p>
+                                        <div class="flex items-center space-x-4 text-sm text-gray-500">
+                                            ${getIcon('fas fa-bed', property.bedrooms || 'Studio')}
+                                            ${getIcon('fas fa-bath', property.bathrooms)}
+                                            ${getIcon('fas fa-ruler-combined', `${property.square_feet} sqft`)}
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        ${getStatusBadge(property.status)}
+                                        <p class="text-xl font-bold text-blue-600 mt-2">৳${property.monthly_rent.toLocaleString()}/month</p>
+                                    </div>
+                                </div>
+                                
+                                ${isInMaintenance ? `
+                                    <div class="bg-yellow-50 p-2 rounded-md mt-3">
+                                        <p class="text-sm text-yellow-800">Under Maintenance - Temporarily Unavailable</p>
+                                    </div>
+                                ` : ''}
+
+                                <div class="flex items-center justify-between mt-3">
+                                    <div class="flex items-center space-x-4 text-sm text-gray-500">
+                                        ${getIcon('fas fa-eye', `${property.views || 0} views`)}
+                                        ${getIcon('fas fa-comment-dots', `${property.inquiries || 0} inquiries`)}
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <a href="./property-details.html?id=${property.id}" class="bg-gray-200 text-gray-700 py-2 px-3 rounded-md font-medium text-sm text-center hover:bg-gray-300 transition-colors">View Details</a>
+                                        <a href="./property-creation.html?id=${property.id}" class="bg-blue-600 text-white py-2 px-3 rounded-md font-medium text-sm text-center hover:bg-blue-700 transition-colors">Edit</a>
+                                        <div class="relative">
+                                            <button class="more-options-btn bg-gray-200 text-gray-700 p-2 rounded-md" data-property-id="${property.id}">
+                                                <i class="fas fa-ellipsis-h"></i>
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                <div class="dropdown-item" data-action="view" data-property-id="${property.id}"><i class="fas fa-eye w-4 h-4 mr-2"></i>View Details</div>
+                                                <a href="./property-creation.html?id=${property.id}" class="dropdown-item" data-action="edit"><i class="fas fa-edit w-4 h-4 mr-2"></i>Edit Property</a>
+                                                <div class="dropdown-item" data-action="duplicate" data-property-id="${property.id}"><i class="fas fa-copy w-4 h-4 mr-2"></i>Duplicate</div>
+                                                <div class="dropdown-item text-red-600" data-action="delete" data-property-id="${property.id}"><i class="fas fa-trash w-4 h-4 mr-2"></i>Delete</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderProperties() {
+            // Use smooth update for better performance
+            smoothUpdate(() => {
+                // Update stats based on the currently displayed properties
+                const totalRevenue = ownerProperties ? ownerProperties.reduce((sum, p) => sum + (p.status !== 'draft' && p.status !== 'maintenance' ? (p.monthly_rent || 0) : 0), 0) : 0;
+                const maintenanceCount = ownerProperties ? ownerProperties.filter(p => p.status === 'maintenance').length : 0;
+                const draftCount = ownerProperties ? ownerProperties.filter(p => p.status === 'draft').length : 0;
+                
+                totalPropertiesEl.textContent = ownerProperties ? ownerProperties.length : 0;
+                monthlyRevenueEl.textContent = `৳${totalRevenue.toLocaleString()}`;
+                domCache.maintenanceCountEl.textContent = maintenanceCount;
+                domCache.draftCountEl.textContent = draftCount;
+                propertyCountEl.textContent = ownerProperties ? ownerProperties.length : 0;
+
+                propertiesContainer.innerHTML = '';
+                if (ownerProperties && ownerProperties.length > 0) {
+                    propertiesContainer.classList.remove('justify-center');
+                    propertiesContainer.innerHTML = ownerProperties.map(renderProperty).join('');
+                } else {
+                    propertiesContainer.classList.add('justify-center');
+                    propertiesContainer.innerHTML = `
+                        <div class="text-center py-12 col-span-full">
+                            <i class="fas fa-home w-16 h-16 text-gray-400 mx-auto mb-4"></i>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">No properties found</h3>
+                            <p class="text-gray-600 mb-4">No properties match your current filters. Try adjusting your search criteria.</p>
+                            <a href="./property-creation.html">
+                                <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center space-x-2 mx-auto">
+                                    <i class="fas fa-plus w-4 h-4"></i>
+                                    <span>Add New Property</span>
+                                </button>
+                            </a>
+                        </div>
+                    `;
+                }
+            });
+        }
+        
+        function getStatusIcon(status) {
+            switch (status) {
+                case 'maintenance': return `<i class="fas fa-tools text-yellow-600"></i>`;
+                case 'draft': return `<i class="fas fa-edit text-gray-600"></i>`;
+                default: return `<i class="fas fa-home text-blue-600"></i>`;
+            }
+        }
+
+        function setupEventListeners() {
+            // --- Main listener for all actions within the container ---
+            propertiesContainer.addEventListener('click', (e) => {
+                const moreOptionsBtn = e.target.closest('.more-options-btn');
+                const dropdownItem = e.target.closest('.dropdown-item');
+
+                // Case 1: User clicked the "..." button
+                if (moreOptionsBtn) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log("More options button clicked!"); // DEBUGGING LINE
+                    
+                    // Close all other dropdowns first
+                    document.querySelectorAll('.dropdown-menu').forEach(d => {
+                        if (d !== moreOptionsBtn.nextElementSibling) {
+                            d.classList.remove('open');
+                        }
+                    });
+                    
+                    // Toggle current dropdown
+                    const dropdown = moreOptionsBtn.nextElementSibling;
+                    if(dropdown) {
+                        dropdown.classList.toggle('open');
+                    }
+                    return; // Stop further processing
+                }
+
+                // Case 2: User clicked an item inside the dropdown
+                if (dropdownItem) {
+                    const action = dropdownItem.dataset.action;
+                    const propertyId = dropdownItem.dataset.propertyId;
+                    if (action && propertyId) {
+                        handlePropertyAction(action, propertyId);
+                    }
+                    // Close all dropdowns after action
+                    document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('open'));
+                    return; // Stop further processing
+                }
+            });
+
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.more-options-btn') && !e.target.closest('.dropdown-menu')) {
+                    document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('open'));
+                }
+            });
+
+            // --- Listeners for filters and view toggles ---
+            const debouncedFetch = debounce(fetchAndRenderProperties, 300);
+            searchInput.addEventListener('input', debouncedFetch);
+            statusFilter.addEventListener('change', fetchAndRenderProperties);
+            typeFilter.addEventListener('change', fetchAndRenderProperties);
+            
+            gridViewBtn.addEventListener('click', () => {
+                viewMode = 'grid';
+                propertiesContainer.classList.add('md:grid-cols-2', 'lg:grid-cols-3');
+                propertiesContainer.classList.remove('space-y-4');
+                gridViewBtn.classList.add('bg-blue-600', 'text-white');
+                gridViewBtn.classList.remove('text-gray-700');
+                listViewBtn.classList.remove('bg-blue-600', 'text-white');
+                listViewBtn.classList.add('text-gray-700');
+                renderProperties();
+            });
+
+            listViewBtn.addEventListener('click', () => {
+                viewMode = 'list';
+                propertiesContainer.classList.remove('md:grid-cols-2', 'lg:grid-cols-3');
+                propertiesContainer.classList.add('space-y-4');
+                listViewBtn.classList.add('bg-blue-600', 'text-white');
+                listViewBtn.classList.remove('text-gray-700');
+                gridViewBtn.classList.remove('bg-blue-600', 'text-white');
+                gridViewBtn.classList.add('text-gray-700');
+                renderProperties();
+            });
+        }
+
+        // Debounce function to limit API calls on input
+        function debounce(func, delay) {
+            let timeout;
+            return function(...args) {
+                const context = this;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+        
+        function handlePropertyAction(action, propertyId) {
+            if (action === 'view') {
+                window.location.href = `./property-details.html?id=${propertyId}`;
+            } else if (action === 'edit') {
+                window.location.href = `./property-creation.html?id=${propertyId}`;
+            } else if (action === 'delete') {
+                if (confirm('Are you sure you want to delete this property? This action cannot be undone.')) {
+                    const token = localStorage.getItem('token');
+                    fetch(`http://localhost:5000/api/properties/${propertyId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    })
+                    .then(res => {
+                        if (!res.ok) {
+                            throw new Error('Failed to delete property.');
+                        }
+                        // Refresh the property list
+                        ownerProperties = ownerProperties.filter(p => p.id !== parseInt(propertyId));
+                        renderProperties();
+                    })
+                    .catch(err => {
+                        console.error('Delete error:', err);
+                        alert(err.message);
+                    });
+                }
+            } else {
+                console.log(`Action: ${action} on Property ID: ${propertyId}`);
+                // In a real app, you would perform an API call here
+                alert(`Action "${action}" triggered for property ${propertyId}`);
+            }
+        }
+
+        // Load dashboard statistics
+        function loadDashboardStats() {
+            const token = localStorage.getItem('token');
+            
+            fetch('http://localhost:5000/api/dashboard/owner', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.message) throw new Error(data.message);
+                // Update dashboard stats if needed
+                console.log('Dashboard stats loaded:', data);
+            })
+            .catch(err => {
+                console.error('Error fetching dashboard stats:', err);
+            });
+        }
+    </script>
+</body>
+</html>
