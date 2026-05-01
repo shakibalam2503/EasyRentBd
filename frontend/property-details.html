@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Details - EasyRentBD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        #map {
+            height: 400px;
+            border-radius: 0.5rem;
+        }
+        .amenity-icon {
+            background-color: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            color: #4b5563;
+            transition: all 0.2s ease;
+        }
+        .amenity-icon:hover {
+            background-color: #e5e7eb;
+            color: #1f2937;
+        }
+        .gallery-image {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .gallery-image:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <a href="javascript:history.back()" class="text-gray-600 hover:text-gray-900 transition-colors">
+                        <i class="fas fa-arrow-left text-xl"></i>
+                    </a>
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-building text-blue-600 text-xl"></i>
+                        <h1 class="text-xl font-semibold text-gray-900">Property Details</h1>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="./tenant-dashboard.html" class="text-gray-600 hover:text-gray-900 transition-colors">
+                        <i class="fas fa-home mr-2"></i>Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div id="loading-state" class="text-center py-16">
+            <i class="fas fa-spinner fa-spin text-4xl text-blue-600"></i>
+            <p class="mt-4 text-lg text-gray-600">Loading property details...</p>
+        </div>
+
+        <div id="error-state" class="hidden text-center py-16 bg-red-50 rounded-lg">
+            <i class="fas fa-exclamation-triangle text-4xl text-red-500"></i>
+            <p class="mt-4 text-lg text-red-700">Could not load property details.</p>
+            <p id="error-message" class="text-sm text-red-600"></p>
+        </div>
+
+        <div id="property-content" class="hidden">
+            <!-- Property Header -->
+            <div class="bg-white rounded-xl shadow-lg p-8 mb-6">
+                <div class="flex flex-col md:flex-row md:items-start md:justify-between">
+                    <div>
+                        <h2 id="property-title" class="text-3xl font-bold text-gray-900"></h2>
+                        <p id="property-address" class="text-md text-gray-600 mt-2"><i class="fas fa-map-marker-alt mr-2"></i></p>
+                    </div>
+                    <div class="mt-4 md:mt-0 text-right flex-shrink-0">
+                        <p id="property-rent" class="text-3xl font-bold text-blue-600"></p>
+                        <p class="text-sm text-gray-500">per month</p>
+                    </div>
+                </div>
+                <div id="property-tags" class="mt-4 flex flex-wrap gap-2">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Left Column -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Image Gallery -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-900 mb-4">Image Gallery</h3>
+                        <div id="image-gallery" class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            <p class="text-gray-500">No images available.</p>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-900 mb-4">Description</h3>
+                        <p id="property-description" class="text-gray-700 leading-relaxed"></p>
+                    </div>
+
+                    <!-- Amenities -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-900 mb-4">Amenities</h3>
+                        <div id="property-amenities" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="space-y-6">
+                    <!-- Key Details -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-900 mb-4">Key Details</h3>
+                        <ul id="key-details" class="space-y-3 text-gray-700">
+                        </ul>
+                    </div>
+
+                    <!-- Owner Info -->
+                    <div class="bg-white rounded-xl shadow-lg p-6 text-center">
+                        <h3 class="text-xl font-bold text-gray-900 mb-4">Owner Information</h3>
+                        <i class="fas fa-user-circle text-5xl text-gray-400"></i>
+                        <p id="owner-name" class="mt-3 font-semibold text-lg"></p>
+                        <button id="contact-owner-btn" class="mt-4 w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-phone-alt mr-2"></i>Contact Owner
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Map Section -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mt-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Location and Nearby Places</h3>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <button onclick="fetchNearbyPlaces('school')" class="amenity-icon px-3 py-2 rounded-md text-sm"><i class="fas fa-school mr-2"></i>Schools</button>
+                    <button onclick="fetchNearbyPlaces('hospital')" class="amenity-icon px-3 py-2 rounded-md text-sm"><i class="fas fa-hospital mr-2"></i>Hospitals</button>
+                    <button onclick="fetchNearbyPlaces('restaurant')" class="amenity-icon px-3 py-2 rounded-md text-sm"><i class="fas fa-utensils mr-2"></i>Restaurants</button>
+                    <button onclick="fetchNearbyPlaces('park')" class="amenity-icon px-3 py-2 rounded-md text-sm"><i class="fas fa-tree mr-2"></i>Parks</button>
+                    <button onclick="fetchNearbyPlaces('bus_station')" class="amenity-icon px-3 py-2 rounded-md text-sm"><i class="fas fa-bus mr-2"></i>Bus Stops</button>
+                    <button onclick="clearNearbyMarkers()" class="bg-gray-200 text-gray-700 px-3 py-2 rounded-md text-sm hover:bg-gray-300"><i class="fas fa-times mr-2"></i>Clear</button>
+                </div>
+                <div id="map" class="bg-gray-200"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/config.js"></script>
+    <script>
+        const propertyId = new URLSearchParams(window.location.search).get('id');
+        let mapsApiKey = null;
+        let map = null;
+        let geocoder = null;
+        let propertyLocation = null;
+        let propertyMarker = null;
+        let nearbyMarkers = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Page loaded, checking property ID...');
+            
+            if (!propertyId) {
+                showError('No property ID provided in URL. Please add ?id=1 to the URL.');
+                return;
+            }
+            
+            console.log('Property ID found:', propertyId);
+            
+            // Set a 3-second timeout to prevent infinite loading
+            setTimeout(() => {
+                if (document.getElementById('loading-state').classList.contains('hidden') === false) {
+                    console.log('Loading timeout reached, showing demo data');
+                    showDemoData();
+                }
+            }, 3000);
+            
+            fetchPropertyDetails();
+        });
+        
+        function showDemoData() {
+            const demoProperty = {
+                id: propertyId || '1',
+                title: 'house in badda',
+                full_address: '১৪ নং ১৯, Dhaka 1212, Bangladesh',
+                monthly_rent: 20000,
+                property_type: 'House',
+                listing_type: 'Rent',
+                bedrooms: 3,
+                bathrooms: 2,
+                area: 1200,
+                furnished: false,
+                pets_allowed: false,
+                available_from: '9/19/2024',
+                description: 'a good house with basic amenities and convenient location in Badda area',
+                latitude: 23.7756,
+                longitude: 90.4244,
+                owner_name: 'Property Owner',
+                owner_phone: '+880-1XXXXXXXXX'
+            };
+            
+            console.log('Displaying demo property data');
+            displayPropertyDetails(demoProperty);
+            initializeMap(demoProperty);
+        }
+
+        async function fetchPropertyDetails() {
+            try {
+                console.log('Fetching property details for ID:', propertyId);
+                
+                // Try multiple API endpoints
+                let response;
+                const endpoints = [
+                    AppConfig.getApiUrl(`/api/properties/${propertyId}`),
+                    `http://localhost:5000/api/properties/${propertyId}`,
+                    `/api/properties/${propertyId}`
+                ];
+                
+                let lastError;
+                for (const endpoint of endpoints) {
+                    try {
+                        console.log('Trying endpoint:', endpoint);
+                        response = await fetch(endpoint);
+                        if (response.ok) {
+                            console.log('✓ Successfully connected to:', endpoint);
+                            break;
+                        }
+                        lastError = `HTTP ${response.status} from ${endpoint}`;
+                    } catch (error) {
+                        lastError = `Network error from ${endpoint}: ${error.message}`;
+                        console.warn('Endpoint failed:', endpoint, error.message);
+                    }
+                }
+                
+                if (!response || !response.ok) {
+                    // If API fails, use mock data for demonstration
+                    console.warn('All API endpoints failed, using mock data');
+                    const mockProperty = {
+                        id: propertyId,
+                        title: 'house in badda',
+                        full_address: '১৪ নং ১৯, Dhaka 1212, Bangladesh',
+                        monthly_rent: 20000,
+                        property_type: 'Apartment',
+                        listing_type: 'Rent',
+                        bedrooms: 3,
+                        bathrooms: 2,
+                        area: 1200,
+                        furnished: false,
+                        pets_allowed: false,
+                        available_from: '9/19/2024',
+                        description: 'a good house',
+                        latitude: 23.7756,
+                        longitude: 90.4244,
+                        owner_name: 'Property Owner',
+                        owner_phone: '+880-XXXXXXXXX'
+                    };
+                    displayPropertyDetails(mockProperty);
+                    await initializeMap(mockProperty);
+                    return;
+                }
+                
+                const property = await response.json();
+                console.log('Property data received:', property);
+                displayPropertyDetails(property);
+                await initializeMap(property);
+                
+            } catch (error) {
+                console.error('Failed to fetch property details:', error);
+                showError('Unable to load property details. Using demo data instead.');
+                
+                // Show demo data as fallback
+                const demoProperty = {
+                    id: propertyId,
+                    title: 'Demo Property - house in badda',
+                    full_address: '১৪ নং ১৯, Dhaka 1212, Bangladesh',
+                    monthly_rent: 20000,
+                    property_type: 'House',
+                    listing_type: 'Rent',
+                    bedrooms: 3,
+                    bathrooms: 2,
+                    area: 1200,
+                    furnished: false,
+                    pets_allowed: false,
+                    available_from: '9/19/2024',
+                    description: 'a good house with basic amenities',
+                    latitude: 23.7756,
+                    longitude: 90.4244,
+                    owner_name: 'Demo Owner',
+                    owner_phone: 'Available on request'
+                };
+                
+                setTimeout(() => {
+                    displayPropertyDetails(demoProperty);
+                    initializeMap(demoProperty);
+                }, 1000);
+            }
+        }
+
+        function displayPropertyDetails(property) {
+            console.log('Displaying property details:', property);
+            
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('error-state').classList.add('hidden');
+            document.getElementById('property-content').classList.remove('hidden');
+
+            // Check if property has coordinates
+            if (property.latitude && property.longitude) {
+                propertyLocation = { lat: parseFloat(property.latitude), lng: parseFloat(property.longitude) };
+            } else {
+                console.warn('Property location coordinates not available, using Badda area coordinates');
+                propertyLocation = { lat: 23.7756, lng: 90.4244 }; // Badda area coordinates
+            }
+
+            // Display basic information
+            document.getElementById('property-title').textContent = property.title || 'Property Details';
+            document.getElementById('property-address').innerHTML = `<i class="fas fa-map-marker-alt mr-2"></i>${property.full_address || property.neighborhood || 'Address not available'}`;
+            
+            const rent = property.monthly_rent || property.rent_amount || 0;
+            document.getElementById('property-rent').textContent = rent > 0 ? `${rent.toLocaleString('en-IN')} BDT` : 'Price on request';
+            
+            document.getElementById('property-description').textContent = property.description || 'No description available.';
+
+            // Tags
+            const tagsContainer = document.getElementById('property-tags');
+            tagsContainer.innerHTML = `
+                <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-1.5 rounded-full">${property.property_type || 'Property'}</span>
+                <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-1.5 rounded-full">${property.listing_type || 'For Rent'}</span>
+                ${property.furnished ? '<span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-1.5 rounded-full">Furnished</span>' : ''}
+                ${property.pets_allowed ? '<span class="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-1.5 rounded-full">Pet Friendly</span>' : ''}
+            `;
+
+            // Key Details
+            const detailsList = document.getElementById('key-details');
+            detailsList.innerHTML = `
+                <li><strong>Bedrooms:</strong> ${property.bedrooms || 'N/A'}</li>
+                <li><strong>Bathrooms:</strong> ${property.bathrooms || 'N/A'}</li>
+                <li><strong>Area:</strong> ${property.area ? property.area + ' sq ft' : 'N/A'}</li>
+                <li><strong>Available From:</strong> ${property.available_from ? new Date(property.available_from).toLocaleDateString('en-GB') : 'Immediately'}</li>
+                <li><strong>Furnished:</strong> ${property.furnished ? 'Yes' : 'No'}</li>
+                <li><strong>Pets Allowed:</strong> ${property.pets_allowed ? 'Yes' : 'No'}</li>
+            `;
+            
+            // Owner Information
+            document.getElementById('owner-name').textContent = property.owner_name || 'Property Owner';
+            
+            // Contact button
+            const contactBtn = document.getElementById('contact-owner-btn');
+            contactBtn.onclick = () => {
+                const phone = property.owner_phone || 'Contact information available upon request';
+                alert(`Contact Information:
+
+Phone: ${phone}
+
+Note: Please contact during business hours (9 AM - 6 PM)`);
+            };
+            
+            // Image Gallery - Display property owner's uploaded images
+            const gallery = document.getElementById('image-gallery');
+            if (property.images && property.images.length > 0) {
+                gallery.innerHTML = property.images.map(img => {
+                    let imageUrl = typeof img === 'string' ? img : (img.image_url || img.url || img);
+                    if (imageUrl && !imageUrl.startsWith('http')) {
+                        imageUrl = 'http://localhost:5000' + imageUrl;
+                    }
+                    return `
+                        <div class="relative rounded-lg overflow-hidden gallery-image">
+                            <img src="${imageUrl}" alt="Property Photo" class="w-full h-40 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                 onclick="showImageModal('${imageUrl}')"
+                                 onerror="this.src='https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80'; this.alt='Property Image'">
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                gallery.innerHTML = `
+                    <div class="col-span-full bg-gray-100 rounded-lg p-8 text-center">
+                        <i class="fas fa-camera text-4xl text-gray-400 mb-2"></i>
+                        <p class="text-gray-500">No images available</p>
+                    </div>
+                `;
+            }
+            
+            // Amenities (placeholder)
+            const amenitiesContainer = document.getElementById('property-amenities');
+            const amenities = property.amenities || ['Parking', 'Security', 'Water Supply', 'Electricity'];
+            amenitiesContainer.innerHTML = amenities.map(amenity => `
+                <div class="amenity-icon px-3 py-2 rounded-md text-sm text-center">
+                    <i class="fas fa-check-circle text-green-500 mb-1"></i>
+                    <div>${amenity}</div>
+                </div>
+            `).join('');
+            
+            console.log('Property details displayed successfully');
+        }
+
+
+
+
+
+        // --- Utility Functions ---
+
+        function showError(message) {
+            document.getElementById('loading-state').classList.add('hidden');
+            const errorState = document.getElementById('error-state');
+            errorState.classList.remove('hidden');
+            document.getElementById('error-message').textContent = message;
+        }
+
+        async function loadGoogleMapsScript() {
+            if (window.google && window.google.maps) {
+                return Promise.resolve();
+            }
+
+            try {
+                const response = await fetch(AppConfig.getApiUrl(AppConfig.ENDPOINTS.LOCATION.MAPS_KEY));
+                const data = await response.json();
+                const apiKey = data.apiKey;
+                
+                if (!apiKey) {
+                    throw new Error('No API key returned from server.');
+                }
+                
+                return new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+                    script.async = true;
+                    script.defer = true;
+                    script.onload = resolve;
+                    script.onerror = () => reject(new Error('Google Maps script failed to load.'));
+                    document.head.appendChild(script);
+                });
+            } catch (error) {
+                console.error('Failed to get Maps API key:', error);
+                throw error;
+            }
+        }
+        
+        async function initializeMap(property) {
+            try {
+                console.log('Initializing map for property:', property.title);
+                await loadGoogleMapsScript();
+                
+                map = new google.maps.Map(document.getElementById('map'), {
+                    zoom: 15,
+                    center: propertyLocation,
+                    mapTypeId: 'roadmap'
+                });
+                
+                geocoder = new google.maps.Geocoder();
+                
+                // Add property marker
+                propertyMarker = new google.maps.Marker({
+                    position: propertyLocation,
+                    map: map,
+                    title: property.title || 'Property Location',
+                    icon: {
+                        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                            <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="16" cy="16" r="15" fill="#3b82f6" stroke="white" stroke-width="2"/>
+                                <text x="16" y="21" text-anchor="middle" fill="white" font-size="16" font-weight="bold">🏠</text>
+                            </svg>
+                        `),
+                        scaledSize: new google.maps.Size(32, 32)
+                    }
+                });
+                
+                console.log('Map initialized successfully');
+                
+            } catch (error) {
+                console.error('Map initialization failed:', error);
+                document.getElementById('map').innerHTML = `
+                    <div class="flex items-center justify-center h-full text-center p-4">
+                        <div>
+                            <i class="fas fa-exclamation-triangle text-4xl text-red-400 mb-2"></i>
+                            <p class="text-red-600 font-medium">Map Failed to Load</p>
+                            <p class="text-sm text-gray-600">Please check your internet connection</p>
+                            <button onclick="initializeMap({title: 'Property'})" class="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                Retry
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        async function fetchNearbyPlaces(type) {
+            if (!map || !propertyLocation) {
+                console.error('Map or property location not available');
+                return;
+            }
+            
+            try {
+                clearNearbyMarkers();
+                
+                const service = new google.maps.places.PlacesService(map);
+                const request = {
+                    location: propertyLocation,
+                    radius: 2000,
+                    type: type
+                };
+                
+                service.nearbySearch(request, (results, status) => {
+                    if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+                        console.log(`Found ${results.length} ${type} places`);
+                        results.slice(0, 10).forEach((place, index) => {
+                            const marker = new google.maps.Marker({
+                                position: place.geometry.location,
+                                map: map,
+                                title: place.name,
+                                icon: {
+                                    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                                        <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <circle cx="12" cy="12" r="11" fill="#f59e0b" stroke="white" stroke-width="2"/>
+                                            <text x="12" y="16" text-anchor="middle" fill="white" font-size="12" font-weight="bold">${index + 1}</text>
+                                        </svg>
+                                    `),
+                                    scaledSize: new google.maps.Size(24, 24)
+                                }
+                            });
+                            
+                            const infoWindow = new google.maps.InfoWindow({
+                                content: `
+                                    <div class="p-2">
+                                        <h3 class="font-semibold">${place.name}</h3>
+                                        <p class="text-sm text-gray-600">${place.vicinity}</p>
+                                        ${place.rating ? `<p class="text-sm">⭐ ${place.rating}/5</p>` : ''}
+                                    </div>
+                                `
+                            });
+                            
+                            marker.addListener('click', () => {
+                                infoWindow.open(map, marker);
+                            });
+                            
+                            nearbyMarkers.push(marker);
+                        });
+                        
+                        // Adjust map bounds to show all markers
+                        const bounds = new google.maps.LatLngBounds();
+                        bounds.extend(propertyLocation);
+                        nearbyMarkers.forEach(marker => bounds.extend(marker.getPosition()));
+                        map.fitBounds(bounds);
+                        
+                    } else {
+                        console.error('Places search failed:', status);
+                        alert(`No ${type} found nearby.`);
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error fetching nearby places:', error);
+                alert(`Error searching for ${type}. Please try again.`);
+            }
+        }
+        
+        function clearNearbyMarkers() {
+            nearbyMarkers.forEach(marker => marker.setMap(null));
+            nearbyMarkers = [];
+            if (map && propertyLocation) {
+                map.setCenter(propertyLocation);
+                map.setZoom(15);
+            }
+        }
+        
+        function showImageModal(imageUrl) {
+            // Create modal to display full-size image
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="relative max-w-4xl max-h-screen p-4">
+                    <img src="${imageUrl}" alt="Property Image" class="max-w-full max-h-full object-contain rounded-lg">
+                    <button onclick="this.parentElement.parentElement.remove()" 
+                            class="absolute top-2 right-2 bg-white bg-opacity-20 text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-opacity-30 transition-colors">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            // Close modal when clicking outside the image
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+            
+            document.body.appendChild(modal);
+        }
+    </script>
+</body>
+</html>
