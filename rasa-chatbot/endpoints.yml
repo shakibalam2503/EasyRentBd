@@ -1,0 +1,10 @@
+action_endpoint:
+  url: http://localhost:5055/webhook
+
+
+tracker_store:
+  type: SQL
+  dialect: mysql
+  url: mysql://root:@localhost:3306/propertymanagement
+  table_name: rasa_tracker_store
+
