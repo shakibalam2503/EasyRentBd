@@ -1,0 +1,171 @@
+version: "3.1"
+
+rules:
+
+# Basic conversation rules
+- rule: Say goodbye anytime the user says goodbye
+  steps:
+  - intent: goodbye
+  - action: utter_goodbye
+
+- rule: Say 'I am a bot' anytime the user challenges
+  steps:
+  - intent: bot_challenge
+  - action: utter_iamabot
+
+- rule: Respond to greeting
+  steps:
+  - intent: greet
+  - action: utter_greet
+
+- rule: Provide help when asked
+  steps:
+  - intent: ask_help
+  - action: utter_help
+
+- rule: Handle out of scope questions
+  steps:
+  - intent: out_of_scope
+  - action: utter_out_of_scope
+
+# Database test rule
+- rule: Test database when requested
+  steps:
+  - intent: test_database
+  - action: action_test_database
+
+# Property search rules
+
+
+- rule: Submit property search form
+  condition:
+  - active_loop: property_search_form
+  steps:
+  - action: property_search_form
+  - active_loop: null
+  - slot_was_set:
+    - requested_slot: null
+  - action: action_search_properties
+
+# Landmark search rule
+
+
+# Property details rules
+- rule: Show property details when requested
+  steps:
+  - intent: get_property_details
+  - action: action_get_property_details
+
+# Contact information rule
+- rule: Provide contact info when requested
+  steps:
+  - intent: get_contact_info
+  - action: action_get_contact_info
+
+# Amenities search rule
+- rule: Show amenities when requested
+  steps:
+  - intent: show_amenities
+  - action: action_show_amenities
+
+# Property comparison rule
+- rule: Compare properties when requested
+  steps:
+  - intent: compare_properties
+  - action: action_compare_properties
+
+# Area information rule
+- rule: Provide area information
+  steps:
+  - intent: area_information
+  - action: action_area_information
+
+# Price inquiry rule
+- rule: Handle price inquiries as area information
+  steps:
+  - intent: price_inquiry
+  - action: action_area_information
+
+# Reset search rule
+- rule: Reset search when requested
+  steps:
+  - intent: reset_search
+  - action: action_reset_search
+
+# Form interruption rules
+
+
+- rule: Handle chitchat during form
+  condition:
+  - active_loop: property_search_form
+  steps:
+  - intent: chitchat
+  - action: utter_chitchat
+  - action: property_search_form
+  - active_loop: property_search_form
+
+# Fallback handling rules
+
+
+# Handle two-stage fallback
+- rule: Implementation of RulePolicy
+  steps:
+  - intent: nlu_fallback
+  - action: action_two_stage_fallback
+  - active_loop: action_two_stage_fallback
+
+# Search result follow-up rules
+
+
+# Handle denial after search results
+
+
+# Specific entity handling rules
+
+
+
+
+# Error recovery rules
+
+
+# Handle property ID extraction
+
+
+# Session management rules
+
+
+# Handle restart scenarios
+- rule: Handle conversation restart
+  steps:
+  - intent: restart
+  - action: action_restart
+
+# Advanced form handling
+- rule: Skip budget if location provided in landmark search
+  condition:
+  - active_loop: property_search_form  
+  - slot_was_set:
+    - landmark: true
+  steps:
+  - action: property_search_form
+  - slot_was_set:
+    - requested_slot: null
+  - active_loop: null
+
+# Map integration rules (placeholder for future enhancement)
+- rule: Handle map requests
+  steps:
+  - intent: show_map
+  - action: utter_map_available
+
+# Contact information follow-up rule
+
+
+# Amenity follow-up rules
+
+
+# Comparison follow-up rule
+
+
+# Handle empty slots gracefully
+

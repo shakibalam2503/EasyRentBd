@@ -1,0 +1,558 @@
+version: "3.1"
+
+stories:
+
+# Basic conversation stories
+- story: greeting and help
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: ask_help
+  - action: utter_help
+
+- story: simple greeting and goodbye
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: goodbye
+  - action: utter_goodbye
+
+# Database test story
+- story: test database connection
+  steps:
+  - intent: test_database
+  - action: action_test_database
+
+# Simple search story for testing
+- story: simple search shows all properties
+  steps:
+  - intent: simple_search
+  - action: action_simple_search
+
+- story: test database with simple command
+  steps:
+  - intent: test_database
+  - action: action_test_database
+
+# Basic property search stories
+
+# Story 1: Basic property search by location
+- story: search properties by location
+  steps:
+  - intent: search_property
+    entities:
+    - location: "Dhaka"
+  - slot_was_set:
+    - location: "Dhaka"
+  - action: action_search_properties
+  - intent: affirm
+  - action: utter_search_results
+
+- story: search properties with budget
+  steps:
+  - intent: search_property
+    entities:
+    - location: "Gulshan"
+    - budget: "25000"
+  - slot_was_set:
+    - location: "Gulshan"
+    - budget: 25000
+  - action: action_search_properties
+
+- story: handle follow-up after search
+  steps:
+  - action: action_search_properties
+  - action: utter_search_results
+
+- story: handle denial after search
+  steps:
+  - action: action_search_properties
+  - slot_was_set:
+    - search_results: true
+  - intent: deny
+  - action: utter_ask_location
+
+- story: search properties with property type
+  steps:
+  - intent: search_property
+    entities:
+    - location: "Dhanmondi"
+    - property_type: "apartment"
+    - bedrooms: "2"
+  - slot_was_set:
+    - location: "Dhanmondi" 
+    - property_type: "apartment"
+    - bedrooms: 2
+  - action: action_search_properties
+
+# Story 2: Landmark-based search (Chat Case 1 from plan)
+- story: landmark search successful
+  steps:
+  - intent: landmark_search
+    entities:
+    - landmark: "Dhaka University"
+  - slot_was_set:
+    - landmark: "Dhaka University"
+  - action: action_landmark_search
+  - intent: affirm
+  - action: utter_search_results
+
+- story: landmark search with follow up
+  steps:
+  - intent: landmark_search
+    entities:
+    - landmark: "United International University"
+  - slot_was_set:
+    - landmark: "United International University"
+  - action: action_landmark_search
+  - intent: get_property_details
+  - action: action_get_property_details
+
+# Story 3: No results fallback (Chat Case 2 from plan)
+- story: search with no results triggers fallback
+  steps:
+  - intent: search_property
+    entities:
+    - location: "Nonexistent Area"
+  - slot_was_set:
+    - location: "Nonexistent Area"
+  - action: action_search_properties
+  - action: action_fallback_search
+  - intent: affirm
+
+- story: landmark search with no results
+  steps:
+  - intent: landmark_search
+    entities:
+    - landmark: "Unknown Landmark"
+  - slot_was_set:
+    - landmark: "Unknown Landmark"
+  - action: action_landmark_search
+  - action: action_fallback_search
+
+# Story 4: Amenity search (Chat Case 3 from plan)
+- story: show amenities near property
+  steps:
+  - intent: search_property
+    entities:
+    - location: "Gulshan"
+  - slot_was_set:
+    - location: "Gulshan"
+  - action: action_search_properties
+  - intent: show_amenities
+    entities:
+    - amenity_type: "hospitals"
+  - slot_was_set:
+    - amenity_type: "hospitals"
+  - action: action_show_amenities
+
+- story: amenities search standalone
+  steps:
+  - intent: show_amenities
+    entities:
+    - amenity_type: "schools"
+  - slot_was_set:
+    - amenity_type: "schools"
+  - action: action_show_amenities
+
+# Property details and contact stories
+- story: get property details after search
+  steps:
+  - intent: search_property
+    entities:
+    - location: "Banani"
+  - slot_was_set:
+    - location: "Banani"
+  - action: action_search_properties
+  - intent: get_property_details
+  - action: action_get_property_details
+
+- story: get property details by id
+  steps:
+  - intent: get_property_details
+    entities:
+    - property_id: "1"
+  - action: action_get_property_details
+
+- story: provide contact tips after showing contact info
+  steps:
+  - action: action_get_contact_info
+  - slot_was_set:
+    - contact_info_shown: true
+  - intent: affirm
+  - action: utter_contact_provided
+
+- story: offer map view after showing amenities
+  steps:
+  - action: action_show_amenities
+  - slot_was_set:
+    - amenities_shown: true
+  - intent: affirm
+  - action: utter_amenities_found
+
+- story: offer details after comparison
+  steps:
+  - action: action_compare_properties
+  - slot_was_set:
+    - comparison_shown: true
+  - intent: affirm
+  - action: utter_comparison_ready
+
+- story: ask for location when none provided
+  steps:
+  - intent: search_property
+  - action: utter_ask_location
+
+- story: ask for budget in form if missing
+  steps:
+  - active_loop: property_search_form
+  - slot_was_set:
+    - budget: null
+  - action: utter_ask_budget
+
+- story: get contact information
+  steps:
+  - intent: search_property
+    entities:
+    - location: "Uttara"
+  - slot_was_set:
+    - location: "Uttara"
+  - action: action_search_properties
+  - intent: get_contact_info
+  - action: action_get_contact_info
+
+- story: direct contact info request
+  steps:
+  - intent: get_contact_info
+    entities:
+    - property_id: "2"
+  - slot_was_set:
+    - property_id: "2"
+  - action: action_get_contact_info
+
+# Property comparison stories
+- story: compare properties after search
+  steps:
+  - intent: search_property
+    entities:
+    - location: "Mirpur"
+  - slot_was_set:
+    - location: "Mirpur"
+  - action: action_search_properties
+  - intent: compare_properties
+  - action: action_compare_properties
+
+- story: compare specific properties
+  steps:
+  - intent: compare_properties
+    entities:
+    - property_id: "1"
+    - property_id: "2"
+  - slot_was_set:
+    - property_id: "1"
+  - action: action_compare_properties
+
+# Area information stories
+- story: get area information
+  steps:
+  - intent: area_information
+    entities:
+    - location: "Gulshan"
+  - slot_was_set:
+    - location: "Gulshan"
+  - action: action_area_information
+
+- story: area info then search
+  steps:
+  - intent: area_information
+    entities:
+    - location: "Dhanmondi"
+  - slot_was_set:
+    - location: "Dhanmondi"
+  - action: action_area_information
+  - intent: affirm
+  - action: action_search_properties
+
+# Price inquiry stories
+- story: price inquiry for area
+  steps:
+  - intent: price_inquiry
+    entities:
+    - location: "Banani"
+  - slot_was_set:
+    - location: "Banani"
+  - action: action_area_information
+
+# Reset and restart stories
+- story: reset search and start over
+  steps:
+  - intent: search_property
+    entities:
+    - location: "Dhaka"
+  - slot_was_set:
+    - location: "Dhaka"
+  - action: action_search_properties
+  - intent: reset_search
+  - action: action_reset_search
+  - intent: search_property
+    entities:
+    - location: "Chittagong"
+  - slot_was_set:
+    - location: "Chittagong"
+  - action: action_search_properties
+
+# Complex conversation flows
+
+# Multi-step property search flow
+- story: detailed property search flow
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: search_property
+    entities:
+    - location: "Gulshan"
+    - budget: "30000"
+  - slot_was_set:
+    - location: "Gulshan"
+    - budget: 30000
+  - action: action_search_properties
+  - intent: get_property_details
+  - action: action_get_property_details
+  - intent: show_amenities
+    entities:
+    - amenity_type: "restaurants"
+  - slot_was_set:
+    - amenity_type: "restaurants"
+  - action: action_show_amenities
+  - intent: get_contact_info
+  - action: action_get_contact_info
+  - intent: goodbye
+  - action: utter_goodbye
+
+# Landmark to property to amenities flow
+- story: landmark to amenities flow
+  steps:
+  - intent: landmark_search
+    entities:
+    - landmark: "Bashundhara City"
+  - slot_was_set:
+    - landmark: "Bashundhara City"
+  - action: action_landmark_search
+  - intent: show_amenities
+    entities:
+    - amenity_type: "hospitals"
+  - slot_was_set:
+    - amenity_type: "hospitals"
+  - action: action_show_amenities
+  - intent: affirm
+
+# Property comparison after landmark search
+- story: landmark search with comparison
+  steps:
+  - intent: landmark_search
+    entities:
+    - landmark: "North South University"
+  - slot_was_set:
+    - landmark: "North South University"
+  - action: action_landmark_search
+  - intent: compare_properties
+  - action: action_compare_properties
+  - intent: get_contact_info
+  - action: action_get_contact_info
+
+# Error recovery stories
+- story: fallback to general search
+  steps:
+  - intent: search_property
+    entities:
+    - location: "Unknown Location"
+  - slot_was_set:
+    - location: "Unknown Location"
+  - action: action_search_properties
+  - action: action_fallback_search
+  - intent: affirm
+  - action: action_search_properties
+
+- story: out of scope handling
+  steps:
+  - intent: out_of_scope
+  - action: utter_out_of_scope
+  - intent: search_property
+    entities:
+    - location: "Dhaka"
+  - slot_was_set:
+    - location: "Dhaka"
+  - action: action_search_properties
+
+# Form-based search stories
+- story: property search form flow
+  steps:
+  - intent: search_property
+  - action: property_search_form
+  - active_loop: property_search_form
+  - slot_was_set:
+    - requested_slot: location
+  - slot_was_set:
+    - location: "Uttara"
+  - slot_was_set:
+    - requested_slot: budget
+  - slot_was_set:
+    - budget: 20000
+  - slot_was_set:
+    - requested_slot: null
+  - active_loop: null
+  - action: action_search_properties
+
+# Interactive conversation patterns
+- story: helpful conversation flow
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: ask_help
+  - action: utter_help
+  - intent: search_property
+    entities:
+    - location: "Dhanmondi"
+  - slot_was_set:
+    - location: "Dhanmondi"
+  - action: action_search_properties
+  - intent: area_information
+  - action: action_area_information
+  - intent: affirm
+
+# Multiple property types search
+- story: multiple criteria search
+  steps:
+  - intent: search_property
+    entities:
+    - location: "Mirpur"
+    - property_type: "furnished"
+    - budget: "15000"
+    - bedrooms: "1"
+  - slot_was_set:
+    - location: "Mirpur"
+    - property_type: "furnished"
+    - budget: 15000
+    - bedrooms: 1
+  - action: action_search_properties
+  - intent: get_property_details
+  - action: action_get_property_details
+
+# Conversation continuation patterns
+- story: search then amenities then contact
+  steps:
+  - intent: search_property
+    entities:
+    - location: "Wari"
+  - slot_was_set:
+    - location: "Wari"
+  - action: action_search_properties
+  - intent: show_amenities
+    entities:
+    - amenity_type: "banks"
+  - slot_was_set:
+    - amenity_type: "banks"
+  - action: action_show_amenities
+  - intent: deny
+  - intent: get_contact_info
+  - action: action_get_contact_info
+  - intent: goodbye
+  - action: utter_goodbye
+
+# Budget-focused stories
+- story: budget focused search
+  steps:
+  - intent: search_property
+    entities:
+    - budget: "25000"
+  - action: utter_ask_location
+
+- story: handle location-only search
+  steps:
+  - intent: search_property
+    entities:
+    - location: "Dhaka"
+  - slot_was_set:
+    - location: "Dhaka"
+  - action: action_search_properties
+
+- story: handle budget-only search
+  steps:
+  - intent: search_property
+    entities:
+    - budget: "25000"
+  - slot_was_set:
+    - budget: 25000
+  - action: utter_ask_location
+  - intent: search_property
+    entities:
+    - location: "Mohammadpur"
+  - slot_was_set:
+    - location: "Mohammadpur"
+  - action: action_search_properties
+
+# Chittagong specific stories (for other cities)
+- story: chittagong property search
+  steps:
+  - intent: search_property
+    entities:
+    - location: "Chittagong"
+  - slot_was_set:
+    - location: "Chittagong"
+  - action: action_search_properties
+  - intent: area_information
+  - action: action_area_information
+
+# University-focused landmark searches
+- story: university area search flow
+  steps:
+  - intent: landmark_search
+    entities:
+    - landmark: "BUET"
+  - slot_was_set:
+    - landmark: "BUET"
+  - action: action_landmark_search
+  - intent: show_amenities
+    entities:
+    - amenity_type: "restaurants"
+  - slot_was_set:
+    - amenity_type: "restaurants"
+  - action: action_show_amenities
+  - intent: get_property_details
+  - action: action_get_property_details
+
+# Negative response handling
+  - intent: search_property
+    entities:
+    - location: "Banani"
+  - slot_was_set:
+    - location: "Banani"
+  - action: action_search_properties
+
+- story: ask before changing slot in form
+  steps:
+  - intent: search_property
+  - action: property_search_form
+  - active_loop: property_search_form
+  - slot_was_set:
+    - requested_slot: location
+  - intent: search_property
+  - action: utter_ask_continue
+  - intent: affirm
+  - action: property_search_form
+  - active_loop: property_search_form
+
+# Removed problematic story that was triggering fallback unnecessarily
+# - story: recover from failed search
+#   steps:
+#   - intent: search_property
+#   - action: action_search_properties
+#   - action: action_fallback_search
+
+- story: auto-extract property ID for details
+  steps:
+  - action: action_search_properties
+  - slot_was_set:
+    - search_results: true
+  - intent: get_property_details
+  - action: action_get_property_details

@@ -1,0 +1,504 @@
+version: "3.1"
+
+nlu:
+- intent: greet
+  examples: |
+    - hello
+    - hi
+    - hey
+    - good morning
+    - good evening
+    - good afternoon
+    - hi there
+    - hello there
+    - greetings
+    - hey there
+    - assalamu alaikum
+    - namaste
+    - salam
+
+- intent: goodbye
+  examples: |
+    - bye
+    - goodbye
+    - see you later
+    - catch you later
+    - talk to you later
+    - bye bye
+    - farewell
+    - take care
+    - allah hafez
+    - khoda hafez
+    - good bye
+    - see ya
+    - until next time
+
+- intent: affirm
+  examples: |
+    - yes
+    - yeah
+    - yep
+    - sure
+    - of course
+    - that's right
+    - correct
+    - exactly
+    - absolutely
+    - definitely
+    - indeed
+    - right
+    - ok
+    - okay
+    - alright
+    - that sounds good
+    - yes please
+    - haa
+    - ha
+    - thik ache
+
+- intent: deny
+  examples: |
+    - no
+    - nope
+    - not really
+    - no thanks
+    - no thank you
+    - i don't think so
+    - not interested
+    - na
+    - nah
+    - no way
+    - not at all
+    - never
+    - not now
+    - maybe later
+    - no please
+
+- intent: ask_help
+  examples: |
+    - help
+    - what can you do
+    - how can you help me
+    - what are your capabilities
+    - what services do you provide
+    - can you help me
+    - i need help
+    - guide me
+    - what do you do
+    - how does this work
+    - what can i ask you
+    - show me options
+    - menu
+    - what features do you have
+
+- intent: search_property
+  examples: |
+    - I want a room in [Dhaka](location)
+    - Looking for a [flat](property_type) in [Gulshan](location)
+    - Find me a [house](property_type) in [Dhanmondi](location) under [25000](budget) taka
+    - I need a [2 bedroom](bedrooms) apartment in [Uttara](location)
+    - Show me properties in [Chittagong](location)
+    - I'm looking for rental properties
+    - Find properties for rent
+    - Search for apartments
+    - I want to rent a place
+    - Looking for a rental home
+    - Find me a [studio](property_type) apartment
+    - I need a place to live
+    - Show me available properties
+    - Find [furnished](property_type) apartments in [Banani](location)
+    - Looking for [3 bedroom](bedrooms) house under [40000](budget) BDT
+    - I want a [flat](property_type) with [2 bathroom](bedrooms) in [Wari](location)
+    - Find me properties within [30000](budget) taka budget
+    - Show me [bachelor](property_type) accommodation in [Mohammadpur](location)
+    - Looking for [family](property_type) apartment in [Mirpur](location)
+    - I need a room for [20000](budget) taka per month
+    - Find [single room](property_type) in [Old Dhaka](location)
+    - I want a house in [badda](location)
+    - Find me a property in [badda](location)
+    - Show me houses in [badda](location)
+    - I want a house in [Badda](location)
+
+- intent: landmark_search
+  examples: |
+    - Find properties near [Dhaka University](landmark)
+    - I want a flat near [United International University](landmark)
+    - Show me rooms close to [Bashundhara City](landmark)
+    - Looking for apartments near [Jamuna Future Park](landmark)
+    - Find houses near [Independent University](landmark)
+    - Properties close to [BUET](landmark)
+    - I need accommodation near [North South University](landmark)
+    - Show me flats near [Dhanmondi Lake](landmark)
+    - Find rooms near [Ramna Park](landmark)
+    - Looking for places near [Shahjalal International Airport](landmark)
+    - Properties near [Bangladesh Bank](landmark)
+    - Find apartments close to [Square Hospital](landmark)
+    - I want a room near [Motijheel](landmark)
+    - Show me properties near [New Market](landmark)
+    - Find houses near [American International University](landmark)
+    - Looking for flats near [East West University](landmark)
+    - Properties close to [BRAC University](landmark)
+    - Near [Gulshan Lake](landmark)
+    - Close to [National Parliament](landmark)
+    - Around [Hatirjheel](landmark)
+
+- intent: show_amenities
+  examples: |
+    - Show me [hospitals](amenity_type) near this property
+    - Find [schools](amenity_type) nearby
+    - What [universities](amenity_type) are close by
+    - Show me nearby [restaurants](amenity_type)
+    - Find [banks](amenity_type) in the area
+    - What [shopping malls](amenity_type) are nearby
+    - Show me [mosques](amenity_type) close to this place
+    - Find [pharmacies](amenity_type) in the vicinity
+    - What [transport](amenity_type) options are available
+    - Show me [bus stations](amenity_type) nearby
+    - Find [ATMs](amenity_type) close by
+    - What [grocery stores](amenity_type) are in the area
+    - Show me [markets](amenity_type) nearby
+    - Find [gas stations](amenity_type) close to this property
+    - What amenities are available
+    - Show me facilities nearby
+    - What's around this area
+    - Find nearby facilities
+    - Show me what's close by
+
+- intent: get_property_details
+  examples: |
+    - Tell me more about property [1](property_id)
+    - Show me details of this property
+    - I want more information about property [5](property_id)
+    - Give me full details of this house
+    - What are the specifications of property [3](property_id)
+    - Show me complete information
+    - Tell me about the amenities
+    - What facilities does this property have
+    - Show me the property features
+    - I want to know more about this place
+    - Give me detailed information
+    - Show me property specifications
+    - What does this property offer
+    - Tell me about this apartment
+    - Show me the property description
+
+- intent: compare_properties
+  examples: |
+    - Compare property [1](property_id) and property [2](property_id)
+    - Show me comparison between these properties
+    - Which is better between property [3](property_id) and property [5](property_id)
+    - Compare these two options
+    - Show me the differences
+    - Help me choose between these properties
+    - What are the pros and cons
+    - Compare the features
+    - Which one should I choose
+    - Show me side by side comparison
+    - Help me decide
+    - What are the differences between these
+    - Compare the amenities
+    - Which property is better value
+
+- intent: get_contact_info
+  examples: |
+    - Give me owner's contact information
+    - How can I contact the owner
+    - Show me contact details
+    - I want to call the owner
+    - Give me the phone number
+    - How to reach the property owner
+    - Contact information please
+    - Owner's details
+    - I want to schedule a visit
+    - How can I get in touch
+    - Give me owner's number
+    - Show me contact info
+    - I need to call them
+    - How to contact
+
+- intent: area_information
+  examples: |
+    - Tell me about [Gulshan](location) area
+    - What's [Dhanmondi](location) like
+    - Give me information about [Uttara](location)
+    - What can you tell me about [Banani](location)
+    - How is [Mirpur](location) area
+    - Tell me about the [Mohammadpur](location) neighborhood
+    - What's the area like in [Wari](location)
+    - Give me details about [Old Dhaka](location)
+    - How's the locality in [Chittagong](location)
+    - What's the neighborhood like
+    - Tell me about this area
+    - Area information
+    - What's this place like
+    - How is the locality
+
+- intent: price_inquiry
+  examples: |
+    - What's the average rent in [Gulshan](location)
+    - How much do properties cost in [Dhanmondi](location)
+    - What's the rent range in this area
+    - How expensive is [Banani](location)
+    - What's the typical price in [Uttara](location)
+    - Give me price information
+    - What's the cost of living here
+    - How much should I budget
+    - What's the rent like in this area
+    - Price range for properties
+    - Cost information
+    - Budget guidance
+    - How much do I need
+    - Show me something around [15000](budget) taka
+    - Find properties near [25000](budget) BDT
+    - I have flexible budget around [20000](budget)
+    - Show me alternatives to [30000](budget) rent
+    - Something close to [18000](budget) would work
+    - Find properties around my budget of [22000](budget)
+    - Show me nearby options to [35000](budget) taka
+    - I can go a bit higher than [15000](budget)
+    - Find something near [20000](budget) or so
+    - Show me alternatives if nothing exact
+
+- intent: test_database
+  examples: |
+    - test
+    - test database
+    - check database
+    - database test
+
+- intent: simple_search
+  examples: |
+    - show all properties
+    - list all properties
+    - show me everything
+    - display all
+    - what do you have
+    - show database properties
+    - list properties
+    - show properties
+    - test database
+    - check connection
+    - database test
+    - system test
+    - check if working
+    - test the system
+    - database check
+    - connectivity test
+    - is it working
+
+- intent: reset_search
+  examples: |
+    - start over
+    - reset search
+    - new search
+    - clear everything
+    - start fresh
+    - reset all
+    - begin again
+    - clear search
+    - restart
+    - start new
+    - fresh start
+    - reset filters
+    - clear all
+
+- intent: out_of_scope
+  examples: |
+    - what's the weather
+    - tell me a joke
+    - what's your name
+    - how old are you
+    - where are you from
+    - what's the time
+    - what day is it
+    - sing a song
+    - tell me a story
+    - what's 2+2
+    - who is the president
+    - what's the news
+    - recipe for cake
+    - how to cook
+    - movie recommendations
+
+# Entities with values and synonyms
+- lookup: location
+  examples: |
+    - Dhaka
+    - Gulshan
+    - Banani
+    - Dhanmondi
+    - Uttara
+    - Mirpur
+    - Mohammadpur
+    - Wari
+    - Old Dhaka
+    - Tejgaon
+    - Ramna
+    - Motijheel
+    - Lalmatia
+    - Shantinagar
+    - Eskaton
+    - Maghbazar
+    - Chittagong
+    - Sylhet
+    - Rajshahi
+    - Khulna
+    - Barisal
+    - Comilla
+    - Badda
+    - badda
+
+- lookup: landmark
+  examples: |
+    - Dhaka University
+    - BUET
+    - United International University
+    - Independent University
+    - North South University
+    - BRAC University
+    - East West University
+    - American International University
+    - Bashundhara City
+    - Jamuna Future Park
+    - New Market
+    - Dhanmondi Lake
+    - Gulshan Lake
+    - Ramna Park
+    - Hatirjheel
+    - National Parliament
+    - Shahjalal International Airport
+    - Bangladesh Bank
+    - Square Hospital
+    - Motijheel
+
+- regex: budget
+  examples: |
+    - \d+
+    - \d+k
+    - \d+ taka
+    - \d+ BDT
+    - \d+ thousand
+
+- lookup: property_type
+  examples: |
+    - apartment
+    - flat
+    - house
+    - studio
+    - room
+    - single room
+    - bachelor
+    - family
+    - furnished
+    - unfurnished
+
+- regex: bedrooms
+  examples: |
+    - \d+ bedroom
+    - \d+ bed
+    - \d+ room
+    - single
+    - double
+    - one
+    - two
+    - three
+    - four
+    - 1
+    - 2
+    - 3
+    - 4
+
+- lookup: amenity_type
+  examples: |
+    - hospital
+    - hospitals
+    - school
+    - schools
+    - university
+    - universities
+    - bank
+    - banks
+    - restaurant
+    - restaurants
+    - shopping mall
+    - shopping
+    - mall
+    - mosque
+    - mosques
+    - pharmacy
+    - pharmacies
+    - transport
+    - bus station
+    - ATM
+    - ATMs
+    - grocery
+    - market
+    - markets
+    - gas station
+
+- synonym: "1"
+  examples: |
+    - one
+    - first
+    - 1st
+
+- synonym: "2"
+  examples: |
+    - two
+    - second
+    - 2nd
+
+- synonym: "3"
+  examples: |
+    - three
+    - third
+    - 3rd
+
+- synonym: "4"
+  examples: |
+    - four
+    - fourth
+    - 4th
+
+- synonym: "apartment"
+  examples: |
+    - flat
+    - unit
+
+- synonym: "house"
+  examples: |
+    - home
+    - building
+
+- synonym: "furnished"
+  examples: |
+    - fully furnished
+    - semi furnished
+
+- synonym: "bachelor"
+  examples: |
+    - single
+    - male only
+    - boys only
+
+- synonym: "family"
+  examples: |
+    - family apartment
+    - mixed
+    - couple friendly
+
+- synonym: "Dhaka"
+  examples: |
+    - Dhaka city
+    - capital
+
+- synonym: "hospital"
+  examples: |
+    - medical center
+    - clinic
+    - health center
+
+- synonym: "university"
+  examples: |
+    - varsity
+    - college
